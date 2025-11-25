@@ -1,0 +1,108 @@
+import axios from 'axios';
+
+const API_URL = 'http://localhost:3001';
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor para agregar token si existe
+api.interceptors.request.use((config) => {
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (user && user.token) {
+    config.headers.Authorization = `Bearer ${user.token}`;
+  }
+  return config;
+});
+
+// Servicios
+export const serviciosAPI = {
+  getAll: () => api.get('/servicios'),
+  getById: (id) => api.get(`/servicios/${id}`),
+  create: (data) => api.post('/servicios', data),
+  update: (id, data) => api.patch(`/servicios/${id}`, data),
+  delete: (id) => api.delete(`/servicios/${id}`),
+};
+
+// Usuarios
+export const usuariosAPI = {
+  getAll: () => api.get('/usuarios'),
+  getById: (id) => api.get(`/usuarios/${id}`),
+  create: (data) => api.post('/usuarios', data),
+  update: (id, data) => api.patch(`/usuarios/${id}`, data),
+  login: async (email, password) => {
+    const response = await api.get('/usuarios');
+    const user = response.data.find(
+      (u) => u.email === email && u.password === password
+    );
+    return user;
+  },
+};
+
+// Turnos
+export const turnosAPI = {
+  getAll: () => api.get('/turnos'),
+  getById: (id) => api.get(`/turnos/${id}`),
+  create: (data) => api.post('/turnos', data),
+  update: (id, data) => api.patch(`/turnos/${id}`, data),
+  delete: (id) => api.delete(`/turnos/${id}`),
+  confirm: async (id) => api.patch(`/turnos/${id}`, { estado: 'confirmado' }),
+  getByUsuario: async (usuarioId) => {
+    const response = await api.get('/turnos');
+    return response.data.filter((t) => t.usuarioId === usuarioId);
+  },
+  getByFecha: async (fecha) => {
+    const response = await api.get('/turnos');
+    return response.data.filter((t) => t.fecha === fecha);
+  },
+};
+
+// Configuración
+export const configuracionAPI = {
+  get: () => api.get('/configuracion'),
+  update: (data) => api.patch('/configuracion', data),
+};
+
+// Horarios Disponibles
+export const horariosAPI = {
+  getPorDia: () => api.get('/horariosPorDia'),
+  getDisponibles: async (fecha) => {
+    // Compatibilidad: retorna solo disponibles del día
+    const estado = await horariosAPI.getEstadoDia(fecha);
+    return estado.disponibles;
+  },
+  getEstadoDia: async (fecha) => {
+    const day = new Date(fecha + 'T00:00:00').getDay();
+    if (day === 0) return { dia: day, todos: [], ocupados: [], disponibles: [] };
+    const [porDiaResp, turnos] = await Promise.all([
+      api.get('/horariosPorDia'),
+      turnosAPI.getByFecha(fecha),
+    ]);
+    const todos = porDiaResp.data[String(day)] || [];
+    const ocupados = turnos.map(t => t.hora);
+    const disponibles = todos.filter(h => !ocupados.includes(h));
+    return { dia: day, todos, ocupados, disponibles };
+  }
+};
+
+// Historial
+export const historialAPI = {
+  getAll: () => api.get('/historialTurnos'),
+  create: (data) => api.post('/historialTurnos', data),
+};
+
+// Carrito
+export const carritoAPI = {
+  getAll: () => api.get('/carrito'),
+  add: (data) => api.post('/carrito', data),
+  remove: (id) => api.delete(`/carrito/${id}`),
+  clear: async () => {
+    const response = await api.get('/carrito');
+    await Promise.all(response.data.map((item) => api.delete(`/carrito/${item.id}`)));
+  },
+};
+
+export default api;

@@ -1,0 +1,160 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nombre": "Admin",
+      "email": "admin@turnos.com",
+      "password": "admin123",
+      "telefono": "3816472708",
+      "rol": "superadmin"
+    },
+    {
+      "nombre": "gaston",
+      "email": "gastonituarte100@gmail.com",
+      "password": "123456",
+      "telefono": "124646464",
+      "rol": "cliente",
+      "id": 1764034413012
+    }
+  ],
+  "servicios": [
+    {
+      "id": 1,
+      "nombre": "Esmaltado Semipermanente",
+      "precio": 8000,
+      "descripcion": "Esmaltado de larga duración (hasta 3 semanas) con preparación completa de la uña.",
+      "duracion": 60,
+      "imagen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwcim8gsm1FnhENICayUrFe0LAk_g3nYZcCw&s"
+    },
+    {
+      "id": 2,
+      "nombre": "Refuerzo / Capping",
+      "precio": 10000,
+      "descripcion": "Refuerzo y reconstrucción para fortalecer uñas naturales débiles o quebradizas.",
+      "duracion": 75,
+      "imagen": "/servicios/capping.jpg"
+    },
+    {
+      "id": 3,
+      "nombre": "Soft Gel Manos",
+      "precio": 9000,
+      "descripcion": "Extensión flexible y liviana con acabado natural ideal para manos.",
+      "duracion": 80,
+      "imagen": "/servicios/softgelmanos.jpg"
+    },
+    {
+      "id": 4,
+      "nombre": "Diseños a Mano Alzada",
+      "precio": 5000,
+      "descripcion": "Arte personalizado sobre tus uñas: flores, lettering, minimalismo y más (precio base).",
+      "duracion": 45,
+      "imagen": "/servicios/disenos.jpg"
+    },
+    {
+      "id": 5,
+      "nombre": "Esmaltado Semipermanente en Pies",
+      "precio": 8000,
+      "descripcion": "Aplicación semipermanente en pies con preparación y acabado profesional.",
+      "duracion": 60,
+      "imagen": "/servicios/semipermanente_pies.jpg"
+    },
+    {
+      "id": 6,
+      "nombre": "Soft Gel en Pies",
+      "precio": 9500,
+      "descripcion": "Extensión y refuerzo Soft Gel adaptado para uñas de pies.",
+      "duracion": 70,
+      "imagen": "/servicios/softgelpies.jpg"
+    }
+  ],
+  "turnos": [
+    {
+      "usuarioId": 1764034413012,
+      "servicioId": 1,
+      "fecha": "2025-11-24",
+      "hora": "10:30",
+      "estado": "confirmado",
+      "pagoId": "MP1764034458744rrwa8ti8g",
+      "montoPagado": 4000,
+      "montoTotal": 8000,
+      "createdAt": "2025-11-25T01:34:18.744Z",
+      "id": 1
+    },
+    {
+      "usuarioId": 1764034413012,
+      "servicioId": 5,
+      "fecha": "2025-11-26",
+      "hora": "17:30",
+      "estado": "confirmado",
+      "pagoId": "MP1764040904966alqbs475r",
+      "montoPagado": 4000,
+      "montoTotal": 8000,
+      "createdAt": "2025-11-25T03:21:44.966Z",
+      "id": 2
+    }
+  ],
+  "horariosDisponibles": [
+    "08:00",
+    "10:30",
+    "14:00",
+    "17:30",
+    "20:00"
+  ],
+  "horariosPorDia": {
+    "1": [
+      "08:00",
+      "10:30",
+      "14:00",
+      "17:30"
+    ],
+    "2": [
+      "08:00",
+      "10:30",
+      "14:00",
+      "17:30",
+      "20:00"
+    ],
+    "3": [
+      "08:00",
+      "10:30",
+      "14:00",
+      "17:30"
+    ],
+    "4": [
+      "08:00",
+      "10:30",
+      "14:00",
+      "17:30",
+      "20:00"
+    ],
+    "5": [
+      "08:00",
+      "10:30",
+      "14:00",
+      "17:30"
+    ],
+    "6": [
+      "08:00",
+      "10:30",
+      "14:00",
+      "17:30",
+      "20:00"
+    ]
+  },
+  "configuracion": {
+    "horaInicio": "08:00",
+    "horaFin": "20:00",
+    "diasLaborales": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "porcentajeSeña": 50,
+    "emailNotificaciones": "delfinanailsstudio@gmail.com"
+  },
+  "carrito": [],
+  "historialTurnos": []
+}

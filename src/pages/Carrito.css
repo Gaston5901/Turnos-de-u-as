@@ -1,0 +1,233 @@
+.carrito-page {
+  min-height: calc(100vh - 200px);
+  padding-bottom: 60px;
+}
+
+.carrito-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--white);
+  padding: 18px 20px;
+  text-align: center;
+}
+
+.carrito-header h1 {
+  font-size: 48px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.carrito-vacio {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.carrito-vacio svg {
+  color: var(--primary-color);
+  opacity: 0.3;
+  margin-bottom: 30px;
+}
+
+.carrito-vacio h2 {
+  font-size: 32px;
+  color: var(--text-dark);
+  margin-bottom: 15px;
+}
+
+.carrito-vacio p {
+  font-size: 18px;
+  color: var(--text-light);
+  margin-bottom: 30px;
+}
+
+.carrito-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.carrito-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.carrito-item {
+  background: var(--white);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 20px;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.carrito-item:hover {
+  transform: translateX(5px);
+}
+
+.item-info h3 {
+  font-size: 22px;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.item-fecha,
+.item-duracion {
+  color: var(--text-light);
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.item-precio {
+  text-align: right;
+}
+
+.precio-total,
+.precio-seña {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.precio-total .label,
+.precio-seña .label {
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.precio-total .valor {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.precio-seña .valor {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-eliminar {
+  background-color: transparent;
+  border: 2px solid var(--error);
+  color: var(--error);
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.btn-eliminar:hover {
+  background-color: var(--error);
+  color: var(--white);
+  transform: scale(1.1);
+}
+
+.carrito-resumen {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.resumen-card {
+  background: var(--white);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.resumen-card h3 {
+  font-size: 24px;
+  margin-bottom: 25px;
+  text-align: center;
+  color: var(--text-dark);
+}
+
+.resumen-detalle {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 16px;
+}
+
+.resumen-seña-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 25px 0;
+  margin-top: 15px;
+  border-top: 2px solid var(--primary-color);
+  font-size: 18px;
+}
+
+.precio-final {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.resumen-info {
+  background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.resumen-info p {
+  font-size: 14px;
+  color: var(--text-dark);
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.btn-pagar {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+@media (max-width: 968px) {
+  .carrito-content {
+    grid-template-columns: 1fr;
+  }
+
+  .carrito-resumen {
+    position: static;
+  }
+
+  .carrito-item {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .item-precio,
+  .btn-eliminar {
+    justify-self: center;
+  }
+
+  .carrito-header h1 {
+    font-size: 32px;
+  }
+}

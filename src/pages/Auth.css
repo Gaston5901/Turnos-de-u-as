@@ -1,0 +1,128 @@
+.auth-container {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+  padding: 40px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-icon {
+  color: var(--primary-color);
+  margin: 0 auto 20px;
+}
+
+.auth-header h1 {
+  font-size: 28px;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.auth-header p {
+  color: var(--text-light);
+  font-size: 16px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.auth-footer p {
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.auth-footer a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.auth-footer a:hover {
+  color: var(--primary-dark);
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  flex: 1;
+  padding-right: 70px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.toggle-password:hover {
+  background: var(--bg-light);
+  color: var(--primary-dark);
+}
+
+.recover-link {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.recover-link a {
+  color: var(--text-light);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+.recover-link a:hover {
+  color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 30px 20px;
+  }
+
+  .auth-header h1 {
+    font-size: 24px;
+  }
+}
