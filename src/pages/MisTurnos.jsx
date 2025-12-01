@@ -52,7 +52,10 @@ const MisTurnos = () => {
   return (
     <div className="mis-turnos-page">
       <div className="mis-turnos-header">
-        <h1>Mis Turnos</h1>
+        <h1>
+          <span className="header-icon"><Calendar size={28} /></span>
+          Mis Turnos
+        </h1>
         <p>Administrá tus reservas</p>
       </div>
 

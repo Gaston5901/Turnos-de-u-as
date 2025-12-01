@@ -100,7 +100,10 @@ const ReservarTurno = () => {
   return (
     <div className="reservar-page">
       <div className="reservar-header">
-        <h1>Reservar Turno</h1>
+        <h1>
+          <span className="header-icon"><Calendar size={28} /></span>
+          Reservar Turno
+        </h1>
         <p>Seleccioná servicio, fecha y horario</p>
       </div>
 

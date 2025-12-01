@@ -75,6 +75,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setUser(null);
     toast.info('Sesión cerrada');
+    window.location.href = '/login';
   };
 
   const isAdmin = () => {

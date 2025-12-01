@@ -84,7 +84,10 @@ const Carrito = () => {
   return (
     <div className="carrito-page">
       <div className="carrito-header">
-        <h1><ShoppingCart size={40} />Mi Carrito</h1>
+        <h1>
+          <span className="header-icon"><ShoppingCart size={28} /></span>
+          Mi Carrito
+        </h1>
       </div>
       <div className="container">
         <div className="carrito-content">

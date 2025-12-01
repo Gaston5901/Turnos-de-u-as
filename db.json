@@ -14,7 +14,7 @@
       "password": "123456",
       "telefono": "124646464",
       "rol": "cliente",
-      "id": 1764034413012
+      "id": 1764034413012   
     }
   ],
   "servicios": [
@@ -29,10 +29,10 @@
     {
       "id": 2,
       "nombre": "Refuerzo / Capping",
-      "precio": 10000,
+      "precio": 15000,
       "descripcion": "Refuerzo y reconstrucción para fortalecer uñas naturales débiles o quebradizas.",
-      "duracion": 75,
-      "imagen": "/servicios/capping.jpg"
+      "duracion": 150,
+      "imagen": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fagora.red%2Fgemmanails%2Fservicios%2Fdiseo-simple-capping-gel&psig=AOvVaw10Dax9s8Shecm2eCAQAeGq&ust=1764368458064000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJCnnO2uk5EDFQAAAAAdAAAAABAE"
     },
     {
       "id": 3,

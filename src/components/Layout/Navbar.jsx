@@ -15,8 +15,11 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
-          <span className="logo-text">Delfina Nails Studio</span>
+        <Link to="/" className="navbar-logo" style={{display: 'flex', alignItems: 'center', height: '54px'}}>
+          <div style={{height: '44px', width: '44px', overflow: 'hidden', borderRadius: '50%', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(233,30,99,0.15)'}}>
+            <img src="/image.png" alt="Logo Nav" style={{height: '90%', width: '90%', objectFit: 'contain', borderRadius: '50%'}} />
+          </div>
+          <span className="logo-text" style={{marginLeft: '10px'}}>Delfina Nails Studio</span>
         </Link>
 
         <div className={`navbar-menu ${isOpen ? 'active' : ''}`}>
