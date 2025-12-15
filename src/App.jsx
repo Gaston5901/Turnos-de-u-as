@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
@@ -18,10 +19,11 @@ import AdminEstadisticas from './pages/Admin/Estadisticas';
 import PanelTrabajo from './pages/Admin/PanelTrabajo';
 import Historial from './pages/Admin/Historial';
 import ServiciosAdmin from './pages/Admin/ServiciosAdmin';
+import EditarCarrusel from './pages/Admin/EditarCarrusel';
 import UsuariosAdmin from './pages/Admin/UsuariosAdmin';
 import RecuperarPassword from './pages/RecuperarPassword';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
-import Nosotros from './pages/Nosotros';
+import Nosotros from './pages/Nosotros'; 
 
 function App() {
   return (
@@ -82,6 +84,15 @@ function App() {
                   element={
                     <ProtectedRoute adminOnly>
                       <ServiciosAdmin />
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route
+                  path="/admin/editar-carrusel"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <EditarCarrusel />
                     </ProtectedRoute>
                   }
                 />

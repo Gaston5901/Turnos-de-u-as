@@ -2,7 +2,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCarrito } from '../../store/useCarritoStore';
-import { Menu, X, ShoppingCart, User, LogOut, LayoutDashboard, Calendar, TrendingUp, FileText } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, LogOut, LayoutDashboard, Calendar, TrendingUp, FileText, Image as ImageIcon } from 'lucide-react';
 import './Navbar.css';
 import './NavbarAdmin.css';
 
@@ -78,6 +78,7 @@ const Navbar = () => {
               <NavLink to="/admin/historial" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <FileText size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Historial</span>}</NavLink>
               <NavLink to="/admin/estadisticas" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <TrendingUp size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Estadísticas</span>}</NavLink>
               <NavLink to="/admin/servicios-admin" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <ShoppingCart size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Servicios</span>}</NavLink>
+              <NavLink to="/admin/editar-carrusel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <ImageIcon size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Editar Carrusel</span>}</NavLink>
               <NavLink to="/admin/usuarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <User size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Usuarios</span>}</NavLink>
             </nav>
             <button className="sidebar-logout" onClick={logout}>
@@ -108,6 +109,7 @@ const Navbar = () => {
                 <NavLink to="/admin/historial" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <FileText size={20} /> <span style={{marginLeft:8}}>Historial</span></NavLink>
                 <NavLink to="/admin/estadisticas" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <TrendingUp size={20} /> <span style={{marginLeft:8}}>Estadísticas</span></NavLink>
                 <NavLink to="/admin/servicios-admin" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <ShoppingCart size={20} /> <span style={{marginLeft:8}}>Servicios</span></NavLink>
+                <NavLink to="/admin/editar-carrusel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <ImageIcon size={20} style={{marginRight:8}} /> <span>Editar Carrusel</span></NavLink>
                 <NavLink to="/admin/usuarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <User size={20} /> <span style={{marginLeft:8}}>Usuarios</span></NavLink>
               </nav>
               <button className="sidebar-logout" onClick={() => { logout(); handleSidebarClose(); }}>

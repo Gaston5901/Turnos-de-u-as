@@ -286,5 +286,11 @@
     "emailNotificaciones": "delfinanailsstudio@gmail.com"
   },
   "carrito": [],
-  "historialTurnos": []
+  "historialTurnos": [],
+  "carrusel": {
+    "imagenes": [
+      "/carrusel1.jpg",
+      "/carrusel2.jpg"
+    ]
+  }
 }

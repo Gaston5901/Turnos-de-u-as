@@ -154,6 +154,11 @@ const Dashboard = () => {
                   <h3>Estadísticas</h3>
                   <p>Ver estadísticas y reportes</p>
                 </Link>
+                <Link to="/admin/editar-carrusel" className="quick-action-card">
+                  <span style={{display:'flex',alignItems:'center',justifyContent:'center',width:28,height:28,fontSize:28,color:'#d13fa0'}}>🖼️</span>
+                  <h3>Editar Carrusel</h3>
+                  <p>Cambiar imágenes del inicio</p>
+                </Link>
               </div>
             </div>
           </div>

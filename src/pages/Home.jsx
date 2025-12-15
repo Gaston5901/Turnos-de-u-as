@@ -4,6 +4,7 @@ import { Calendar, Clock, Sparkles, Shield, Award, DollarSign } from 'lucide-rea
 import { serviciosAPI, turnosAPI } from '../services/api';
 import './Home.css';
 import HeroCarousel from '../components/HeroCarousel';
+import useCarruselImages from '../hooks/useCarruselImages';
 
 const Home = () => {
   const [destacados, setDestacados] = useState([]);
@@ -40,11 +41,13 @@ const Home = () => {
     cargar();
   }, []);
 
+  const carruselImgs = useCarruselImages();
+
   return (
     <div className="home">
       {/* Hero Section */}
       <section className="hero">
-        <HeroCarousel />
+        <HeroCarousel images={carruselImgs} />
         <div className="hero-overlay"></div>
 
         <div className="hero-content">
