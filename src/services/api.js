@@ -69,6 +69,7 @@ export const configuracionAPI = {
 // Horarios Disponibles
 export const horariosAPI = {
   getPorDia: () => api.get('/horariosPorDia'),
+  setPorDia: (data) => api.put('/horariosPorDia', data),
   getDisponibles: async (fecha) => {
     // Compatibilidad: retorna solo disponibles del día
     const estado = await horariosAPI.getEstadoDia(fecha);

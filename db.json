@@ -14,7 +14,47 @@
       "password": "123456",
       "telefono": "124646464",
       "rol": "cliente",
-      "id": 1764034413012   
+      "id": 1764034413012
+    },
+    {
+      "nombre": "pp",
+      "email": "sdsd@sdsd",
+      "telefono": "4545454",
+      "password": "temporal123",
+      "rol": "cliente",
+      "id": 1764034413013
+    },
+    {
+      "nombre": "pp",
+      "email": "dsds@dsdsd",
+      "telefono": "26565655",
+      "password": "temporal123",
+      "rol": "cliente",
+      "id": 1764034413014
+    },
+    {
+      "nombre": "gass",
+      "email": "gastomituarte@gmail.com",
+      "telefono": "454545",
+      "password": "temporal123",
+      "rol": "cliente",
+      "id": 1764034413015
+    },
+    {
+      "nombre": "wewe",
+      "email": "wewew@dsd",
+      "telefono": "eweewew",
+      "password": "temporal123",
+      "rol": "cliente",
+      "id": 1764034413016
+    },
+    {
+      "nombre": "kkk",
+      "email": "gafa@fsfsf",
+      "telefono": "454545",
+      "password": "temporal123",
+      "rol": "cliente",
+      "id": 1764034413017
     }
   ],
   "servicios": [
@@ -32,7 +72,7 @@
       "precio": 15000,
       "descripcion": "Refuerzo y reconstrucción para fortalecer uñas naturales débiles o quebradizas.",
       "duracion": 150,
-      "imagen": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fagora.red%2Fgemmanails%2Fservicios%2Fdiseo-simple-capping-gel&psig=AOvVaw10Dax9s8Shecm2eCAQAeGq&ust=1764368458064000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJCnnO2uk5EDFQAAAAAdAAAAABAE"
+      "imagen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNCR_XquW0GUd1RW4k4-D7ng_kMiTOHCsDVQ&s"
     },
     {
       "id": 3,
@@ -40,7 +80,7 @@
       "precio": 9000,
       "descripcion": "Extensión flexible y liviana con acabado natural ideal para manos.",
       "duracion": 80,
-      "imagen": "/servicios/softgelmanos.jpg"
+      "imagen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYrbgfvu6EqYKVvewyMpyzSBMxKEqe152Kow&s"
     },
     {
       "id": 4,
@@ -56,7 +96,7 @@
       "precio": 8000,
       "descripcion": "Aplicación semipermanente en pies con preparación y acabado profesional.",
       "duracion": 60,
-      "imagen": "/servicios/semipermanente_pies.jpg"
+      "imagen": "https://i.ytimg.com/vi/V2T8RkqYuD8/maxresdefault.jpg"
     },
     {
       "id": 6,
@@ -73,24 +113,108 @@
       "servicioId": 1,
       "fecha": "2025-11-24",
       "hora": "10:30",
-      "estado": "confirmado",
+      "estado": "completado",
       "pagoId": "MP1764034458744rrwa8ti8g",
       "montoPagado": 4000,
       "montoTotal": 8000,
       "createdAt": "2025-11-25T01:34:18.744Z",
-      "id": 1
+      "id": 1,
+      "registroEstadistica": "seña"
     },
     {
       "usuarioId": 1764034413012,
       "servicioId": 5,
       "fecha": "2025-11-26",
       "hora": "17:30",
-      "estado": "confirmado",
+      "estado": "completado",
       "pagoId": "MP1764040904966alqbs475r",
       "montoPagado": 4000,
       "montoTotal": 8000,
       "createdAt": "2025-11-25T03:21:44.966Z",
-      "id": 2
+      "id": 2,
+      "registroEstadistica": "seña"
+    },
+    {
+      "usuarioId": 1764034413012,
+      "servicioId": 1,
+      "fecha": "2025-12-08",
+      "hora": "08:00",
+      "estado": "completado",
+      "pagoId": "MP176516209352667lysupkq",
+      "montoPagado": 4000,
+      "montoTotal": 8000,
+      "createdAt": "2025-12-08T02:48:13.526Z",
+      "id": 3,
+      "email": "gastonituarte100@gmail.com",
+      "nombre": "gaston",
+      "telefono": "124646464",
+      "registroEstadistica": "seña"
+    },
+    {
+      "usuarioId": 1764034413014,
+      "servicioId": 1,
+      "fecha": "2025-12-09",
+      "hora": "08:00",
+      "estado": "completado",
+      "pagoId": "PRESENCIAL1765166785653",
+      "montoPagado": 0,
+      "montoTotal": 8000,
+      "createdAt": "2025-12-08T04:06:25.653Z",
+      "id": 4,
+      "email": "dsds@dsdsd",
+      "nombre": "pp",
+      "telefono": "26565655",
+      "registroEstadistica": "seña"
+    },
+    {
+      "usuarioId": 1764034413015,
+      "servicioId": 1,
+      "fecha": "2025-12-13",
+      "hora": "14:00",
+      "estado": "completado",
+      "pagoId": "PRESENCIAL1765582890093",
+      "montoPagado": 4000,
+      "montoTotal": 8000,
+      "createdAt": "2025-12-12T23:41:30.094Z",
+      "id": 5,
+      "registroEstadistica": "total"
+    },
+    {
+      "usuarioId": 1764034413016,
+      "servicioId": 2,
+      "fecha": "2025-12-12",
+      "hora": "14:00",
+      "estado": "completado",
+      "pagoId": "PRESENCIAL1765583803754",
+      "montoPagado": 7500,
+      "montoTotal": 15000,
+      "createdAt": "2025-12-12T23:56:43.754Z",
+      "id": 6,
+      "registroEstadistica": "total"
+    },
+    {
+      "usuarioId": 1764034413017,
+      "servicioId": 1,
+      "fecha": "2025-12-15",
+      "hora": "08:00",
+      "estado": "confirmado",
+      "pagoId": "PRESENCIAL1765752128166",
+      "montoPagado": 4000,
+      "montoTotal": 8000,
+      "createdAt": "2025-12-14T22:42:08.166Z",
+      "id": 7
+    },
+    {
+      "usuarioId": 1764034413012,
+      "servicioId": 6,
+      "fecha": "2025-12-15",
+      "hora": "10:30",
+      "estado": "confirmado",
+      "pagoId": "MP1765753736748zp4cahsgk",
+      "montoPagado": 4750,
+      "montoTotal": 9500,
+      "createdAt": "2025-12-14T23:08:56.748Z",
+      "id": 8
     }
   ],
   "horariosDisponibles": [
@@ -139,6 +263,12 @@
       "14:00",
       "17:30",
       "20:00"
+    ],
+    "2025-12-10": [
+      "08:00",
+      "10:30",
+      "14:00",
+      "17:30"
     ]
   },
   "configuracion": {

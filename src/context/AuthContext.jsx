@@ -72,10 +72,45 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    const currentUser = JSON.parse(localStorage.getItem('user'));
     localStorage.removeItem('user');
     setUser(null);
-    toast.info('Sesión cerrada');
-    window.location.href = '/login';
+    const spinnerDiv = document.createElement('div');
+    spinnerDiv.style.position = 'fixed';
+    spinnerDiv.style.top = 0;
+    spinnerDiv.style.left = 0;
+    spinnerDiv.style.width = '100vw';
+    spinnerDiv.style.height = '100vh';
+    spinnerDiv.style.background = 'rgba(255,255,255,0.95)';
+    spinnerDiv.style.display = 'flex';
+    spinnerDiv.style.flexDirection = 'column';
+    spinnerDiv.style.alignItems = 'center';
+    spinnerDiv.style.justifyContent = 'center';
+    spinnerDiv.style.zIndex = 9999;
+    let spinnerColor = '#ffb6d5', spinnerTop = '#ad1457', title = '', subtitle = '', titleColor = '#ad1457', subColor = '#d81b60';
+    if (currentUser && (currentUser.rol === 'admin' || currentUser.rol === 'superadmin')) {
+      title = '¡Adiós admin!';
+      subtitle = 'Cerrando sesión...';
+    } else if (currentUser) {
+      spinnerColor = '#90caf9'; spinnerTop = '#1976d2'; titleColor = '#1976d2'; subColor = '#1976d2';
+      title = `¡Hasta luego, ${currentUser.nombre || 'usuario'}!`;
+      subtitle = 'Cerrando sesión...';
+    } else {
+      title = '¡Hasta luego!'; subtitle = 'Cerrando sesión...';
+    }
+    spinnerDiv.innerHTML = `
+      <div style="margin-bottom:24px">
+        <div class='spinner' style='width:60px;height:60px;border:6px solid ${spinnerColor};border-top:6px solid ${spinnerTop};border-radius:50%;animation:spin 1s linear infinite;'></div>
+      </div>
+      <h2 style='color:${titleColor};font-family:Montserrat,sans-serif;font-size:2rem;margin-bottom:8px;'>${title}</h2>
+      <p style='color:${subColor};font-size:1.1rem;'>${subtitle}</p>
+      <style>@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}</style>
+    `;
+    document.body.appendChild(spinnerDiv);
+    setTimeout(()=>{
+      document.body.removeChild(spinnerDiv);
+      window.location.href = '/login';
+    },5000);
   };
 
   const isAdmin = () => {

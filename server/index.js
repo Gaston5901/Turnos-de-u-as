@@ -1,3 +1,25 @@
+// Endpoint para actualizar horariosPorDia (horarios extras y fechas especiales)
+app.put('/horariosPorDia', (req, res) => {
+  try {
+    const db = readDB();
+    db.horariosPorDia = req.body;
+    writeDB(db);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Error guardando horarios' });
+  }
+});
+// Endpoint para actualizar horariosPorDia (horarios extras y fechas especiales)
+app.put('/horariosPorDia', (req, res) => {
+  try {
+    const db = readDB();
+    db.horariosPorDia = req.body;
+    writeDB(db);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Error guardando horarios' });
+  }
+});
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';

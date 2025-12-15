@@ -21,6 +21,7 @@ import ServiciosAdmin from './pages/Admin/ServiciosAdmin';
 import UsuariosAdmin from './pages/Admin/UsuariosAdmin';
 import RecuperarPassword from './pages/RecuperarPassword';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import Nosotros from './pages/Nosotros';
 
 function App() {
   return (
@@ -116,6 +117,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/nosotros" element={<Nosotros />} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </main>

@@ -166,7 +166,6 @@ const Home = () => {
           <div className="cta-content">
             <h2>¿Lista para tus nuevas uñas?</h2>
             <p>Pagás la seña ahora y el resto en el estudio</p>
-
             <Link to="/reservar" className="btn btn-primary btn-large">
               <Calendar size={24} />
               Reservar Mi Turno
@@ -174,6 +173,26 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+        {/* Ubicación Section */}
+        <section className="ubicacion-section">
+          <div className="container">
+            <h2 className="section-title">Ubicación</h2>
+            <p className="section-subtitle">¡Encontranos fácilmente en nuestro estudio!</p>
+            <div className="map-responsive">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282.803021234839!2d-58.44587668477044!3d-34.60908018045409!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccb7e2b2e2e2b%3A0x2e2e2e2e2e2e2e2e!2sUbicacion%20Ejemplo!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar"
+                width="100%"
+                height="350"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Mapa ubicación"
+              ></iframe>
+            </div>
+          </div>
+        </section>
     </div>
   );
 };

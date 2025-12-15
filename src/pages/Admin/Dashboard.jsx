@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { turnosAPI, serviciosAPI, usuariosAPI } from '../../services/api';
-import { LayoutDashboard, Calendar, DollarSign, Users, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Calendar, DollarSign, Users, TrendingUp, Package } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import './Admin.css';
 
@@ -71,103 +71,95 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-header">
-        <h1>
-          <LayoutDashboard size={40} />
-          Panel de Administración
-        </h1>
-        <p>Bienvenida al panel de control</p>
-      </div>
-
-      <div className="container">
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4caf50, #66bb6a)' }}>
-              <Calendar size={32} />
-            </div>
-            <div className="stat-info">
-              <h3>Turnos Hoy</h3>
-              <p className="stat-number">{stats.turnosHoy}</p>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #2196f3, #42a5f5)' }}>
-              <TrendingUp size={32} />
-            </div>
-            <div className="stat-info">
-              <h3>Turnos Este Mes</h3>
-              <p className="stat-number">{stats.turnosMes}</p>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ff9800, #ffa726)' }}>
-              <DollarSign size={32} />
-            </div>
-            <div className="stat-info">
-              <h3>Ganancias del Mes</h3>
-              <p className="stat-number">${stats.gananciasMes.toLocaleString()}</p>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #9c27b0, #ba68c8)' }}>
-              <Users size={32} />
-            </div>
-            <div className="stat-info">
-              <h3>Clientes Registrados</h3>
-              <p className="stat-number">{stats.clientes}</p>
-            </div>
-          </div>
+      <div className="admin-page">
+        <div className="admin-header">
+          <h1 style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
+            <LayoutDashboard size={36} style={{verticalAlign:'middle'}} />
+            <span>Panel de Administración</span>
+          </h1>
+          <p>Resumen y estadísticas del estudio</p>
         </div>
-
-        <div className="admin-sections">
-          <div className="admin-section">
-            <h2>Turnos de Hoy</h2>
-            {turnosHoy.length > 0 ? (
-              <div className="turnos-hoy-list">
-                {turnosHoy.map((turno, index) => {
-                  const servicio = servicios[turno.servicioId];
-                  return (
-                    <div key={turno.id} className="turno-hoy-item">
-                      <div className="turno-hora">{turno.hora}</div>
-                      <div className="turno-detalles">
-                        <h4>{servicio?.nombre}</h4>
-                        <p>ID: {turno.pagoId}</p>
-                      </div>
-                      <div className={`turno-estado ${turno.estado}`}>
-                        {turno.estado === 'confirmado' ? 'Confirmado' : 'Completado'}
-                      </div>
-                    </div>
-                  );
-                })}
+        <div className="container" style={{maxWidth:'1200px',margin:'0 auto'}}>
+          <div className="stats-grid" style={{marginBottom:'32px'}}>
+            <div className="stat-card">
+              <span className="stat-icon" style={{background:'#ffb6d5'}}><Calendar size={28} /></span>
+              <div className="stat-info">
+                <h3>Turnos Hoy</h3>
+                <div className="stat-number">{stats.turnosHoy}</div>
               </div>
-            ) : (
-              <p className="no-data">No hay turnos programados para hoy</p>
-            )}
+            </div>
+            <div className="stat-card">
+              <span className="stat-icon" style={{background:'#f48fb1'}}><TrendingUp size={28} /></span>
+              <div className="stat-info">
+                <h3>Turnos Mes</h3>
+                <div className="stat-number">{stats.turnosMes}</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <span className="stat-icon" style={{background:'#ce93d8'}}><DollarSign size={28} /></span>
+              <div className="stat-info">
+                <h3>Ganancias Mes (Señas)</h3>
+                <div className="stat-number">${stats.gananciasMes.toLocaleString()}</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <span className="stat-icon" style={{background:'#b2dfdb'}}><Users size={28} /></span>
+              <div className="stat-info">
+                <h3>Clientes</h3>
+                <div className="stat-number">{stats.clientes}</div>
+              </div>
+            </div>
           </div>
-
-          <div className="admin-section">
-            <h2>Accesos Rápidos</h2>
-            <div className="quick-actions">
-              <Link to="/admin/turnos" className="quick-action-card">
-                <Calendar size={32} />
-                <h3>Gestionar Turnos</h3>
-                <p>Ver, crear y administrar turnos</p>
-              </Link>
-              <Link to="/admin/estadisticas" className="quick-action-card">
-                <TrendingUp size={32} />
-                <h3>Estadísticas</h3>
-                <p>Reportes y gráficos detallados</p>
-              </Link>
+          <div className="admin-sections" style={{gap:'24px'}}>
+            <div className="admin-section" style={{minWidth:'320px'}}>
+              <h2 style={{fontSize:'20px'}}>Turnos de Hoy</h2>
+              <div className="turnos-hoy-list">
+                {turnosHoy.length > 0 ? (
+                  turnosHoy.map((t) => (
+                    <div key={t.id} className="turno-hoy-item">
+                      <div className="turno-hora">{t.hora}</div>
+                      <div className="turno-detalles">
+                        <h4>{servicios[t.servicioId]?.nombre}</h4>
+                        <p>{t.montoPagado ? `Pagado: $${t.montoPagado}` : 'Sin pago'}</p>
+                        <p className="turno-id">ID: {t.pagoId}</p>
+                      </div>
+                      <div className={`turno-estado ${t.estado}`}>{t.estado}</div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-data">No hay turnos para hoy</p>
+                )}
+              </div>
+            </div>
+            <div className="admin-section" style={{minWidth:'320px'}}>
+              <h2 style={{fontSize:'20px'}}>Acciones Rápidas</h2>
+              <div className="quick-actions">
+                <Link to="/admin/servicios" className="quick-action-card">
+                  <Package size={28} />
+                  <h3>Servicios</h3>
+                  <p>Gestionar servicios</p>
+                </Link>
+                <Link to="/admin/turnos" className="quick-action-card">
+                  <Calendar size={28} />
+                  <h3>Turnos</h3>
+                  <p>Ver y administrar turnos</p>
+                </Link>
+                <Link to="/admin/usuarios" className="quick-action-card">
+                  <Users size={28} />
+                  <h3>Usuarios</h3>
+                  <p>Ver clientes y admins</p>
+                </Link>
+                <Link to="/admin/estadisticas" className="quick-action-card">
+                  <TrendingUp size={28} />
+                  <h3>Estadísticas</h3>
+                  <p>Ver estadísticas y reportes</p>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default Dashboard;

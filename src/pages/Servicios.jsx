@@ -44,7 +44,21 @@ const Servicios = () => {
             <div key={servicio.id} className="servicio-card servicio-card-home">
               <div className="service-preview-img-wrapper">
                 {servicio.imagen ? (
-                  <img src={servicio.imagen} alt={servicio.nombre} className="service-preview-img" />
+                  <img
+                    src={servicio.imagen}
+                    alt={servicio.nombre}
+                    className="service-preview-img"
+                    style={{
+                      borderRadius: '12px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                      border: '2px solid #ffe3f2',
+                      background: '#fff0fa',
+                      objectFit: 'contain',
+                      width: '100%',
+                      height: '100%'
+                    }}
+                    onError={e => { e.target.onerror=null; e.target.src='https://via.placeholder.com/120x120?text=Sin+Imagen'; }}
+                  />
                 ) : (
                   <div className="service-preview-icon-alt"><Sparkles size={40} /></div>
                 )}
