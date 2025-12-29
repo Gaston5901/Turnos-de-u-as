@@ -90,6 +90,8 @@
 .no-turnos h2 {
   font-size: 32px;
   color: var(--text-dark);
+   margin-bottom: 15px;
+}
 
 .no-turnos-visual {
   display: flex;
@@ -103,8 +105,8 @@
   padding: 40px 20px;
   margin: 0 auto;
   max-width: 420px;
-}
-  margin-bottom: 15px;
+
+ 
 }
 
 .no-turnos p {
@@ -224,21 +226,43 @@
   font-family: monospace;
 }
 
+
 .turno-badge {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  color: var(--white);
-  padding: 3px 10px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: lowercase;
   box-shadow: 0 2px 8px rgba(233,30,99,0.08);
+  border: none;
+  background: #f5f5f5;
+  color: #888;
+  transition: all 0.2s;
+  user-select: none;
 }
-
+.turno-badge.confirmado {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+.turno-badge.cancelado {
+  background: #ffebee;
+  color: #d32f2f;
+}
 .turno-badge.completado {
-  background: var(--text-light);
+  background: #f3f6f4;
+  color: #388e3c;
+}
+.turno-badge.devuelto {
+  background: #fffde7;
+  color: #bfa100;
+}
+.turno-badge.expirado {
+  background: #fff3e0;
+  color: #f57c00;
 }
 
 @media (max-width: 768px) {

@@ -94,22 +94,25 @@ const Estadisticas = () => {
           // Filtrar turnos por mes y año usando getFullYear y getMonth (local)
           const turnosMes = turnos.filter(t => {
             const fechaTurno = new Date(t.fecha);
-            return fechaTurno >= inicio && fechaTurno <= fin;
+            return fechaTurno >= inicio && fechaTurno <= fin && !t.seniaDevuelta;
           });
-          // Log para depuración
-          console.log(`Mes: ${label}`);
-          console.log('Turnos en este mes:', turnosMes.map(t => ({fecha: t.fecha, estado: t.estado, montoTotal: t.montoTotal, montoPagado: t.montoPagado})));
-          // Sumar montoTotal de turnos completados
+          // Sumar ganancias de turnos completados según registroEstadistica
           const gananciaCompletados = turnosMes
             .filter(t => (t.estado || '').toLowerCase().trim() === 'completado')
-            .reduce((sum, t) => sum + parseMonto(t.montoTotal), 0);
-          // Sumar montoPagado (seña) de turnos expirados
-          const gananciaExpirados = turnosMes
-            .filter(t => (t.estado || '').toLowerCase().trim() === 'expirado')
-            .reduce((sum, t) => sum + parseMonto(t.montoPagado), 0);
+            .reduce((sum, t) => {
+              if (t.registroEstadistica === 'seña') {
+                return sum + parseMonto(t.montoPagado);
+              }
+              if (t.registroEstadistica === 'total') {
+                return sum + parseMonto(t.montoTotal);
+              }
+              if (parseMonto(t.montoPagado) < parseMonto(t.montoTotal)) {
+                return sum + parseMonto(t.montoPagado);
+              }
+              return sum + parseMonto(t.montoTotal);
+            }, 0);
           // Ganancia total del mes
-          const ganancia = gananciaCompletados + gananciaExpirados;
-          console.log(`Ganancia completados: $${gananciaCompletados}, Ganancia expirados: $${gananciaExpirados}, Total: $${ganancia}`);
+          const ganancia = gananciaCompletados;
           meses.push({ mes: label, ganancia });
         }
         if (mounted) setEvolucionData(meses);
@@ -169,9 +172,10 @@ const Estadisticas = () => {
         fechaFinDate = new Date(anio, 11, endOfYear(new Date(anio, 0, 1)).getDate());
       }
 
+      // Excluir turnos con seña devuelta
       const turnosFiltrados = turnos.filter(t => {
         const fechaTurno = new Date(t.fecha);
-        return fechaTurno >= fechaInicioDate && fechaTurno <= fechaFinDate;
+        return fechaTurno >= fechaInicioDate && fechaTurno <= fechaFinDate && !t.seniaDevuelta;
       });
 
 
@@ -179,8 +183,20 @@ const Estadisticas = () => {
       // Total de señas: suma montoPagado de todos los turnos filtrados (del mes/año)
       const totalSenias = turnosFiltrados.reduce((sum, t) => sum + parseMonto(t.montoPagado), 0);
 
-      // Ganancia real: suma montoTotal de los turnos completados
-      const totalGanancias = turnosFiltrados.filter(t => t.estado === 'completado').reduce((sum, t) => sum + parseMonto(t.montoTotal), 0);
+      // Ganancia real: suma según registroEstadistica ('seña' o 'total')
+      const totalGanancias = turnosFiltrados.filter(t => t.estado === 'completado').reduce((sum, t) => {
+        if (t.registroEstadistica === 'seña') {
+          return sum + parseMonto(t.montoPagado);
+        }
+        if (t.registroEstadistica === 'total') {
+          return sum + parseMonto(t.montoTotal);
+        }
+        // Fallback: lógica anterior por si falta el campo
+        if (parseMonto(t.montoPagado) < parseMonto(t.montoTotal)) {
+          return sum + parseMonto(t.montoPagado);
+        }
+        return sum + parseMonto(t.montoTotal);
+      }, 0);
 
       const promedioGanancia =
         turnosFiltrados.length > 0
@@ -196,7 +212,18 @@ const Estadisticas = () => {
         if (!id) return;
         serviciosCount[id] = (serviciosCount[id] || 0) + 1;
         if (t.estado === 'completado') {
-          serviciosGanancias[id] = (serviciosGanancias[id] || 0) + parseMonto(t.montoTotal);
+          if (t.registroEstadistica === 'seña') {
+            serviciosGanancias[id] = (serviciosGanancias[id] || 0) + parseMonto(t.montoPagado);
+          } else if (t.registroEstadistica === 'total') {
+            serviciosGanancias[id] = (serviciosGanancias[id] || 0) + parseMonto(t.montoTotal);
+          } else {
+            // Fallback: lógica anterior
+            if (parseMonto(t.montoPagado) < parseMonto(t.montoTotal)) {
+              serviciosGanancias[id] = (serviciosGanancias[id] || 0) + parseMonto(t.montoPagado);
+            } else {
+              serviciosGanancias[id] = (serviciosGanancias[id] || 0) + parseMonto(t.montoTotal);
+            }
+          }
         }
         // Si no está completado, no suma nada al gráfico de ganancias
       });
@@ -444,7 +471,7 @@ const Estadisticas = () => {
             </h3>
             <ul style={{fontSize:16,lineHeight:1.7,marginBottom:10}}>
               <li><strong>Ganancias mostradas arriba:</strong> solo suman las <b>señas</b> cobradas por adelantado (50% del valor del servicio).</li>
-              <li><strong>Ganancia real estimada:</strong> <span style={{color:'#388e3c'}}>{formatMoney(stats.totalGanancias * 2)}</span> (incluye señas + pagos finales de turnos completados).</li>
+              <li><strong>Ganancia real estimada:</strong> <span style={{color:'#388e3c'}}>{formatMoney(stats.totalGananciasReales || 0)}</span> (incluye señas + pagos finales de turnos completados).</li>
               <li><strong>Turnos completados:</strong> incluyen el pago final realizado en el local.</li>
               <li><strong>Turnos expirados:</strong> solo se suma la seña cobrada, ya que el cliente no asistió.</li>
               <li><strong>Ranking de servicios:</strong> muestra los servicios más reservados y sus ganancias por señas.</li>

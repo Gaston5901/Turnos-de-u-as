@@ -59,6 +59,7 @@ const PanelTrabajo = () => {
   const [turnosExpirados, setTurnosExpirados] = useState([]);
   const [servicios, setServicios] = useState({});
   const [usuarios, setUsuarios] = useState({});
+  const [turnosCancelados, setTurnosCancelados] = useState([]);
 
   const hoyStr = format(new Date(), 'yyyy-MM-dd');
   const mananaStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
@@ -75,20 +76,46 @@ const PanelTrabajo = () => {
       setServicios(serviciosMap); setUsuarios(usuariosMap);
 
       const todos = turnosRes.data;
-      setTurnosHoy(todos.filter(t => t.fecha === hoyStr && t.estado !== 'completado').sort((a,b)=>a.hora.localeCompare(b.hora)));
-      setTurnosManana(todos.filter(t => t.fecha === mananaStr && t.estado !== 'completado').sort((a,b)=>a.hora.localeCompare(b.hora)));
-      setTurnosExpirados(todos.filter(t => t.fecha < hoyStr && t.estado !== 'completado').sort((a,b)=>a.fecha.localeCompare(b.fecha)));
+      setTurnosHoy(todos.filter(t => t.fecha === hoyStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado').sort((a,b)=>a.hora.localeCompare(b.hora)));
+      setTurnosManana(todos.filter(t => t.fecha === mananaStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado').sort((a,b)=>a.hora.localeCompare(b.hora)));
+      setTurnosExpirados(todos.filter(t => t.fecha < hoyStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado').sort((a,b)=>a.fecha.localeCompare(b.fecha)));
+      setTurnosCancelados(todos.filter(t => t.estado === 'cancelado').sort((a,b)=>a.fecha.localeCompare(b.fecha)));
     } catch (e) {
       console.error(e);
     } finally { setLoading(false); }
   };
+
+  // Render para cancelados (fuera de cargar)
+  function renderCancelados(lista) {
+    return lista.length ? lista.map(t => {
+      const s = servicios[t.servicioId];
+      const u = usuarios[t.usuarioId];
+      return (
+        <div key={t.id} className="turno-cancelado-item" style={{background:'#fff3f3',border:'1.5px solid #e57373',borderRadius:'12px',padding:'12px 18px',marginBottom:'10px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div>
+            <div style={{fontWeight:'bold',color:'#e53935'}}>{t.hora} - {s?.nombre}</div>
+            <div style={{fontSize:'1rem',color:'#ad1457'}}>{u?.nombre} / {u?.telefono}</div>
+            <div className="turno-id" style={{fontSize:'0.9em',color:'#888'}}>ID: {t.pagoId}</div>
+          </div>
+          <div style={{display:'flex',gap:'8px'}}>
+            <button className="btn-accion completar" onClick={()=>marcarCompletado(t)} title="Completar solo seña">
+              <CheckCircle size={20} /> Completar seña
+            </button>
+            <button className="btn-accion cancelar" onClick={()=>devolverSenia(t)} title="Devolver seña">
+              Devolver seña
+            </button>
+          </div>
+        </div>
+      );
+    }) : <p className="no-data">Sin turnos cancelados</p>;
+  }
 
   useEffect(()=>{ cargar(); }, []);
 
   const marcarCompletado = async (turno) => {
     // Si expirado, solo seña; si normal, seña + resto
     let update = { estado: 'completado' };
-    if (turno.fecha < hoyStr) {
+    if (turno.fecha < hoyStr || turno.estado === 'cancelado') {
       update.registroEstadistica = 'seña';
     } else {
       update.registroEstadistica = 'total';
@@ -105,7 +132,7 @@ const PanelTrabajo = () => {
   };
 
   const devolverSenia = async (turno) => {
-    await turnosAPI.update(turno.id, { estado: 'devuelto', registroEstadistica: 'ninguno' });
+    await turnosAPI.update(turno.id, { estado: 'devuelto', registroEstadistica: 'ninguno', seniaDevuelta: true });
     toast.info('Seña devuelta, no se registra en estadísticas');
     cargar();
   };
@@ -123,7 +150,7 @@ const PanelTrabajo = () => {
       const itemClass = tipo === 'expirados' ? 'turno-expirado-item' : 'turno-hoy-item';
       return (
         <div key={t.id} className={itemClass}>
-          <div className="turno-hora">{t.hora}</div>
+          <div className="turno-hora">{t.hora ? t.hora : ''}</div>
           <div className="turno-detalles">
             <h4>{s?.nombre}</h4>
             <p>{u?.nombre} / {u?.telefono}</p>
@@ -170,6 +197,10 @@ const PanelTrabajo = () => {
           <div className="admin-section">
             <h2><AlertTriangle size={18}/> Expirados</h2>
             {renderLista(turnosExpirados, 'expirados')}
+          </div>
+          <div className="admin-section">
+            <h2 style={{color:'#e53935'}}>Cancelados</h2>
+            {renderCancelados(turnosCancelados)}
           </div>
         </div>
       </div>

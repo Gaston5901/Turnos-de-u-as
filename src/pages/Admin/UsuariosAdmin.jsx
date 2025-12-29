@@ -64,24 +64,34 @@ const UsuariosAdmin = () => {
           <div className="filtros">
             <button className={`filtro-btn ${filtroRol === 'todos' ? 'active' : ''}`} onClick={() => setFiltroRol('todos')}>Todos</button>
             <button className={`filtro-btn ${filtroRol === 'cliente' ? 'active' : ''}`} onClick={() => setFiltroRol('cliente')}>Clientes</button>
-            <button className={`filtro-btn ${filtroRol === 'superadmin' ? 'active' : ''}`} onClick={() => setFiltroRol('superadmin')}>Admins</button>
+            <button className={`filtro-btn ${filtroRol === 'admin' ? 'active' : ''}`} onClick={() => setFiltroRol('admin')}>Admins</button>
           </div>
         </div>
 
         <div className="usuarios-grid">
           {usuariosFiltrados.length > 0 ? (
             usuariosFiltrados.map((usuario) => (
-              <div key={usuario.id} className="usuario-card">
+              <div
+                key={usuario.id}
+                className="usuario-card"
+                style={usuario.rol === 'cliente' ? { border: '2px solid #38bdf8', boxShadow: '0 0 8px #b6eaff55' } : {}}
+              >
                 <div className="usuario-icon">
-                  {usuario.rol === 'superadmin' ? <Shield size={32} /> : <UserIcon size={32} />}
+                  {usuario.rol === 'admin' ? <Shield size={32} /> : <UserIcon size={32} />}
                 </div>
                 <div className="usuario-info">
-                  <h3>{usuario.nombre}</h3>
-                  <p><strong>Email:</strong> {usuario.email}</p>
-                  <p><strong>Teléfono:</strong> {usuario.telefono}</p>
-                  <span className={`badge badge-${usuario.rol === 'superadmin' ? 'warning' : 'success'}`}>
-                    {usuario.rol === 'superadmin' ? 'Admin' : 'Cliente'}
-                  </span>
+                  <h2 style={{fontSize:'1.25rem',marginBottom:'4px'}}>{usuario.nombre || '(Sin nombre)'}</h2>
+                  {usuario.rol === 'admin' ? (
+                    <span className="badge badge-admin" style={{ background: 'gold', color: '#333', fontWeight: 'bold', padding: '6px 16px', borderRadius: '16px', fontSize: '1rem', marginTop: '8px', display: 'inline-block', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <span role="img" aria-label="corona" style={{fontSize:'1.3em',marginRight:'4px'}}>👑</span>Admin
+                    </span>
+                  ) : (
+                    <>
+                      <p style={{ color: '#2563eb', fontWeight: 500, marginBottom: 2 }}>Gmail: {usuario.email}</p>
+                      <p style={{ color: '#059669', fontWeight: 500, marginBottom: 8 }}>Teléfono: {usuario.telefono ? usuario.telefono : '(Sin cargar)'}</p>
+                      <span className="badge badge-cliente" style={{ background: '#e0f7fa', color: '#0288d1', fontWeight: 'bold', borderRadius: '16px', padding: '5px 14px', fontSize: '1rem', marginTop: '4px', display: 'inline-block' }}>Cliente</span>
+                    </>
+                  )}
                 </div>
               </div>
             ))

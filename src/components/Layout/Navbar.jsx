@@ -16,9 +16,13 @@ const Navbar = () => {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [sidebarClosing, setSidebarClosing] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+  const [isTablet, setIsTablet] = useState(window.innerWidth > 900 && window.innerWidth <= 1200);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 900);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 900);
+      setIsTablet(window.innerWidth > 900 && window.innerWidth <= 1200);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -37,7 +41,8 @@ const Navbar = () => {
   };
 
   if (user && isAdmin()) {
-    const sidebarWidth = sidebarHover ? 220 : 56;
+    // Sidebar: desktop expandido, tablet colapsado, móvil hamburguesa
+    const sidebarWidth = sidebarHover || isTablet ? 220 : 56;
     return (
       <>
         <nav className="navbar">
@@ -48,7 +53,7 @@ const Navbar = () => {
               </div>
               <span className="logo-text" style={{marginLeft: '10px'}}>Delfina Nails Studio</span>
             </Link>
-            {isMobile && (
+            {(isMobile || isTablet) && (
               <button
                 className={`navbar-toggle${showMobileSidebar ? ' open' : ''}`}
                 onClick={showMobileSidebar ? handleSidebarClose : handleSidebarOpen}
@@ -62,11 +67,11 @@ const Navbar = () => {
             )}
           </div>
         </nav>
-        {/* Sidebar para escritorio */}
+        {/* Sidebar para escritorio y tablet */}
         {!isMobile && (
-          <aside className={`admin-sidebar${sidebarHover ? ' expanded' : ' collapsed'}`}
-            onMouseEnter={() => setSidebarHover(true)}
-            onMouseLeave={() => setSidebarHover(false)}
+          <aside className={`admin-sidebar${sidebarHover || isTablet ? ' expanded' : ' collapsed'}`}
+            onMouseEnter={() => !isTablet && setSidebarHover(true)}
+            onMouseLeave={() => !isTablet && setSidebarHover(false)}
           >
             <div className="sidebar-header">
               <span style={{fontWeight: 'bold', fontSize: '1.2rem'}}>Admin</span>

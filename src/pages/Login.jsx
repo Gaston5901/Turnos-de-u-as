@@ -14,6 +14,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData({
@@ -22,25 +23,46 @@ const Login = () => {
     });
   };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.email.trim()) newErrors.email = 'El email es obligatorio.';
+    else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.email)) newErrors.email = 'El email no es válido.';
+    if (!formData.password) newErrors.password = 'La contraseña es obligatoria.';
+    else if (formData.password.length < 6) newErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    const validationErrors = validate();
+    setFieldErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
     setLoading(true);
+    const MIN_SECONDS = 4; // Cambia este valor para el mínimo de segundos
+    const start = Date.now();
     try {
       const success = await login(formData.email, formData.password);
+      const elapsed = Date.now() - start;
+      const wait = Math.max(0, MIN_SECONDS * 1000 - elapsed);
       if (success) {
         const user = JSON.parse(localStorage.getItem('user'));
-        if (user && (user.rol === 'admin' || user.rol === 'superadmin')) {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
+        setTimeout(() => {
+          if (user && (user.rol === 'admin' || user.rol === 'superadmin')) {
+            navigate('/admin');
+          } else {
+            navigate('/mis-turnos');
+          }
+          setLoading(false);
+        }, wait);
       } else {
-        setError('Email o contraseña incorrectos.');
+        setTimeout(() => {
+          setError('Email o contraseña incorrectos.');
+          setLoading(false);
+        }, wait);
       }
     } catch (err) {
       setError('Ocurrió un error al iniciar sesión.');
-    } finally {
       setLoading(false);
     }
   };
@@ -57,7 +79,7 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="auth-form">
           {error && <div className="auth-error">{error}</div>}
           <div className="form-group">
-            <label id="email" className="form-label">Email</label>
+            <label id="email" className="form-label">Gmail</label>
             <input
               type="email"
               name="email"
@@ -67,6 +89,7 @@ const Login = () => {
               onChange={handleChange}
               required
             />
+            {fieldErrors.email && <div className="auth-error">{fieldErrors.email}</div>}
           </div>
 
           <div className="form-group">
@@ -85,6 +108,7 @@ const Login = () => {
                 {formData.showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
               </button>
             </div>
+            {fieldErrors.password && <div className="auth-error">{fieldErrors.password}</div>}
           </div>
 
           <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
@@ -94,13 +118,28 @@ const Login = () => {
 
           {loading && (
             <div className="spinner-fullscreen">
-              <span className="spinner">
-                <svg viewBox="0 0 50 50">
-                  <circle cx="25" cy="25" r="20" fill="none" stroke="#38bdf8" strokeWidth="5" strokeLinecap="round" strokeDasharray="31.4 31.4" transform="rotate(-90 25 25)">
-                    <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.8s" repeatCount="indefinite" />
+              <span className="spinner spinner-gradient">
+                <svg viewBox="0 0 60 60">
+                  <defs>
+                    <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#d13fa0" />
+                      <stop offset="100%" stopColor="#ff5ec4" />
+                    </linearGradient>
+                  </defs>
+                  <circle
+                    cx="30" cy="30" r="24"
+                    fill="none"
+                    stroke="url(#spinner-gradient)"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray="60 90"
+                    style={{ filter: 'drop-shadow(0 2px 12px #d13fa055)' }}
+                  >
+                    <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="0.9s" repeatCount="indefinite" />
                   </circle>
                 </svg>
               </span>
+              {/* <div style={{marginTop:18, color:'#d13fa0', fontWeight:600, fontSize:18, textShadow:'0 1px 8px #fff8'}}>Cargando...</div> */}
             </div>
           )}
           <div className="recover-link">

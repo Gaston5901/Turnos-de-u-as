@@ -27,11 +27,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const userData = await usuariosAPI.login(email, password);
-      if (userData) {
-        const userWithToken = { ...userData, token: 'mock-token-' + Date.now() };
+      if (userData && userData.usuario) {
+        const userWithToken = { ...userData.usuario, token: 'mock-token-' + Date.now() };
         localStorage.setItem('user', JSON.stringify(userWithToken));
         setUser(userWithToken);
         toast.success('¡Bienvenido/a!');
+        // La navegación la maneja el componente Login.jsx
         return true;
       } else {
         toast.error('Email o contraseña incorrectos');

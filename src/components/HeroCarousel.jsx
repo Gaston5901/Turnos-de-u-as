@@ -9,7 +9,10 @@ const defaultImages = [
 ];
 
 const HeroCarousel = ({ images }) => {
-  const imgs = images && images.length > 0 ? images : defaultImages;
+  // Filtrar imágenes válidas (URL, base64, etc)
+  const imgs = Array.isArray(images) && images.length > 0
+    ? images.filter(img => typeof img === 'string' && img.trim().length > 0)
+    : defaultImages;
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {

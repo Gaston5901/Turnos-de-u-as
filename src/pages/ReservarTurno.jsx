@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { serviciosAPI, horariosAPI } from '../services/api';
@@ -7,6 +8,8 @@ import { Calendar, Clock, Check } from 'lucide-react';
 import { format, addDays, startOfToday } from 'date-fns';
 import { toast } from 'react-toastify';
 import './ReservarTurno.css';
+
+
 
 const ReservarTurno = () => {
   const navigate = useNavigate();
@@ -68,7 +71,9 @@ const ReservarTurno = () => {
       // Usar el servicio turnosAPI para obtener los turnos
       const turnosResp = await import('../services/api').then(mod => mod.turnosAPI.getAll());
       const turnos = turnosResp.data || [];
-      const ocupados = turnos.filter(t => t.fecha === fecha).map(t => t.hora);
+      const ocupados = turnos
+      .filter(t => t.fecha === fecha && ["pendiente", "confirmado"].includes(t.estado))
+      .map(t => t.hora);
 
       setEstadoHorarios({
         todos,
@@ -132,11 +137,19 @@ const ReservarTurno = () => {
 
   const agregarAlCarritoYContinuar = () => {
     if (!user) {
+      // Guardar selección en localStorage y redirigir a login
+      if (servicioSeleccionado && fechaSeleccionada && horaSeleccionada) {
+        localStorage.setItem('reservaPendiente', JSON.stringify({
+          servicioSeleccionado,
+          fechaSeleccionada,
+          horaSeleccionada
+        }));
+      }
       toast.info('Iniciá sesión o creá tu cuenta para continuar');
       navigate('/login');
       return;
     }
-
+    // Si está logueado, flujo normal
     agregarAlCarrito(servicioSeleccionado, fechaSeleccionada, horaSeleccionada);
     navigate('/carrito');
   };

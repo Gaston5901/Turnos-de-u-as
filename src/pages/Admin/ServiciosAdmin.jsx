@@ -4,6 +4,8 @@ import { Package, Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
 import './Admin.css';
 
+import ServicioModal from './ServicioModal';
+
 const ServiciosAdmin = () => {
   const [servicios, setServicios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -125,73 +127,14 @@ const ServiciosAdmin = () => {
           </button>
         </div>
 
-        {mostrarForm && (
-          <div className="formulario-turno">
-            <h3>{editando ? 'Editar Servicio' : 'Nuevo Servicio'}</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label className="form-label">Nombre del Servicio</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Precio ($)</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={formData.precio}
-                    onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Duración (minutos)</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={formData.duracion}
-                    onChange={(e) => setFormData({ ...formData, duracion: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">URL Imagen</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.imagen}
-                    onChange={(e) => setFormData({ ...formData, imagen: e.target.value })}
-                    placeholder="/servicios/imagen.jpg"
-                  />
-                </div>
-                <div className="form-group" style={{gridColumn:'1/-1'}}>
-                  <label className="form-label">Descripción</label>
-                  <textarea
-                    className="form-input"
-                    rows="3"
-                    value={formData.descripcion}
-                    onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                    required
-                  ></textarea>
-                </div>
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary">
-                  {editando ? 'Actualizar' : 'Crear'} Servicio
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={resetForm}>
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+        <ServicioModal
+          visible={mostrarForm}
+          onClose={resetForm}
+          onSubmit={handleSubmit}
+          formData={formData}
+          setFormData={setFormData}
+          editando={editando}
+        />
 
         <div className="servicios-grid">
           {serviciosFiltrados.length > 0 ? (

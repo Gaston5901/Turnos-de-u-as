@@ -24,8 +24,8 @@ const Carrito = () => {
       const serviciosEmail = [];
       for (const item of items) {
         const turnoData = {
-          usuarioId: user.id,
-          servicioId: item.servicio.id,
+          usuario: user.id,
+          servicio: item.servicio.id,
           fecha: item.fecha,
           hora: item.hora,
           estado: 'confirmado',

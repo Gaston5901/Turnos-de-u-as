@@ -11,6 +11,7 @@ const Dashboard = () => {
     turnosMes: 0,
     gananciasMes: 0,
     clientes: 0,
+    clientesNuevosMes: 0,
   });
   const [turnosHoy, setTurnosHoy] = useState([]);
   const [servicios, setServicios] = useState({});
@@ -43,6 +44,14 @@ const Dashboard = () => {
         (t) => t.fecha >= inicioMes && t.fecha <= finMes
       );
 
+      // Clientes nuevos este mes
+      const usuarioIdsMes = [...new Set(turnosDelMes.map(t => t.usuarioId))];
+      // Para cada usuario, buscar si tiene turnos previos al mes
+      const clientesNuevosMes = usuarioIdsMes.filter(uid => {
+        const prevTurnos = turnosRes.data.find(t => t.usuarioId === uid && t.fecha < inicioMes);
+        return !prevTurnos;
+      }).length;
+
       const gananciasMes = turnosDelMes.reduce((sum, t) => sum + t.montoPagado, 0);
       const clientesUnicos = usuariosRes.data.filter((u) => u.rol === 'cliente').length;
 
@@ -51,6 +60,7 @@ const Dashboard = () => {
         turnosMes: turnosDelMes.length,
         gananciasMes,
         clientes: clientesUnicos,
+        clientesNuevosMes // <-- nuevo dato
       });
 
       setTurnosHoy(turnosDelDia.sort((a, b) => a.hora.localeCompare(b.hora)));
@@ -95,18 +105,25 @@ const Dashboard = () => {
                 <div className="stat-number">{stats.turnosMes}</div>
               </div>
             </div>
-            <div className="stat-card">
+            {/* <div className="stat-card">
               <span className="stat-icon" style={{background:'#ce93d8'}}><DollarSign size={28} /></span>
               <div className="stat-info">
                 <h3>Ganancias Mes (Señas)</h3>
                 <div className="stat-number">${stats.gananciasMes.toLocaleString()}</div>
               </div>
-            </div>
+            </div> */}
             <div className="stat-card">
               <span className="stat-icon" style={{background:'#b2dfdb'}}><Users size={28} /></span>
               <div className="stat-info">
                 <h3>Clientes</h3>
                 <div className="stat-number">{stats.clientes}</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <span className="stat-icon" style={{background:'#ffe082'}}><Users size={28} /></span>
+              <div className="stat-info">
+                <h3>Clientes nuevos este mes</h3>
+                <div className="stat-number">{stats.clientesNuevosMes}</div>
               </div>
             </div>
           </div>

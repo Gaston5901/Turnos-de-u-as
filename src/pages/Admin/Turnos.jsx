@@ -163,20 +163,38 @@ const Turnos = () => {
       let usuario = Object.values(usuarios).find(u => u.email === nuevoTurno.email);
       if (!usuario) {
         const nuevoUsuario = {
-          nombre: nuevoTurno.nombre,
-          email: nuevoTurno.email,
-          telefono: nuevoTurno.telefono,
+          nombre: nuevoTurno.nombre?.trim() || '',
+          email: nuevoTurno.email?.trim() || '',
+          telefono: nuevoTurno.telefono?.trim() || '',
           password: 'temporal123',
           rol: 'cliente',
         };
-        const userRes = await usuariosAPI.create(nuevoUsuario);
-        usuario = userRes.data;
+        console.log('Payload usuario:', nuevoUsuario);
+        try {
+          const userRes = await usuariosAPI.create(nuevoUsuario);
+          usuario = userRes.data;
+        } catch (userError) {
+          // Mostrar todos los errores de validación del backend
+          if (userError?.response?.data?.errores) {
+            userError.response.data.errores.forEach(err => {
+              toast.error('Error usuario: ' + err.msg);
+            });
+          } else if (userError?.response?.data?.msg) {
+            toast.error('Error usuario: ' + userError.response.data.msg);
+          } else if (userError?.response?.data?.message) {
+            toast.error('Error usuario: ' + userError.response.data.message);
+          } else {
+            toast.error('Error al crear usuario');
+          }
+          console.error(userError);
+          return;
+        }
       }
       const servicio = servicios[nuevoTurno.servicioId];
       const montoSeña = Math.round(servicio.precio * 0.5);
       const turnoData = {
-        usuarioId: usuario.id,
-        servicioId: parseInt(nuevoTurno.servicioId),
+        usuario: usuario.id, // Mongo espera 'usuario' como ObjectId
+        servicio: servicio.id || servicio._id, // Mongo espera 'servicio' como ObjectId
         fecha: nuevoTurno.fecha,
         hora: nuevoTurno.hora,
         estado: 'confirmado',
@@ -184,6 +202,10 @@ const Turnos = () => {
         montoPagado: montoSeña,
         montoTotal: servicio.precio,
         createdAt: new Date().toISOString(),
+        // Extras para frontend
+        email: usuario.email,
+        nombre: usuario.nombre,
+        telefono: usuario.telefono,
       };
       await turnosAPI.create(turnoData);
       toast.success('Turno creado exitosamente con seña pagada');
@@ -358,16 +380,21 @@ const Turnos = () => {
         </div>
 
         {mostrarFormulario && (
-          <div className="modal-turno-bg" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.35)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,animation:'fadeInBg .4s'}} onClick={() => setMostrarFormulario(false)}>
+          <div className="modal-turno-bg" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.35)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,animation:'fadeInBg .4s'}} onClick={() => { setMostrarFormulario(false); setNuevoTurno({ nombre: '', telefono: '', email: '', servicioId: '', fecha: '', hora: '' }); }}>
             <div className="modal-turno" style={{background:'linear-gradient(135deg,#fff 80%,#e7b2e6 100%)',borderRadius:'22px',boxShadow:'0 8px 40px rgba(180,0,90,0.18)',padding:'0',minWidth:'340px',maxWidth:'95vw',width:'520px',animation:'modalScaleIn .4s',position:'relative',display:'flex',flexDirection:'column',maxHeight:'90vh'}} onClick={e => e.stopPropagation()}>
-              <button style={{position:'absolute',top:18,right:18,background:'none',border:'none',fontSize:'1.3rem',color:'#d13fa0',cursor:'pointer',zIndex:2}} onClick={() => setMostrarFormulario(false)} title="Cerrar">×</button>
+              <button style={{position:'absolute',top:18,right:18,background:'none',border:'none',fontSize:'1.3rem',color:'#d13fa0',cursor:'pointer',zIndex:2}} onClick={() => { setMostrarFormulario(false); setNuevoTurno({ nombre: '', telefono: '', email: '', servicioId: '', fecha: '', hora: '' }); }} title="Cerrar">×</button>
               {/* Flujo igual al cliente: servicio, fecha, horario */}
               <div style={{padding:'38px 38px 0 38px',overflowY:'auto',flex:'1 1 auto'}}>
                 <h3 style={{marginBottom:'22px',fontWeight:'bold',fontSize:'1.35rem',color:'#d13fa0'}}>Crear Turno Presencial</h3>
                 {/* Paso 1: Servicio */}
                 {!nuevoTurno.servicioId && (
                   <div>
-                    <h4>Seleccioná el servicio</h4>
+                    <div style={{display:'flex',alignItems:'center',marginBottom:'10px'}}>
+                      <button className="btn btn-secondary" style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'7px 18px',fontWeight:'bold',fontSize:'1rem',transition:'0.2s',marginRight:'16px'}} onClick={() => setMostrarFormulario(false)}>
+                        Cancelar
+                      </button>
+                      <h4 style={{margin:0}}>Seleccioná el servicio</h4>
+                    </div>
                     <div className="servicios-grid-reserva">
                       {Object.values(servicios).map((servicio) => (
                         <div key={servicio.id} className="servicio-card-reserva" onClick={() => setNuevoTurno({ ...nuevoTurno, servicioId: servicio.id })}>
@@ -385,7 +412,12 @@ const Turnos = () => {
                 {/* Paso 2: Fecha */}
                 {nuevoTurno.servicioId && !nuevoTurno.fecha && (
                   <div>
-                    <h4>Seleccioná la fecha</h4>
+                    <div style={{display:'flex',alignItems:'center',marginBottom:'10px'}}>
+                      <button className="btn btn-secondary" style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'7px 18px',fontWeight:'bold',fontSize:'1rem',transition:'0.2s',marginRight:'16px'}} onClick={() => setNuevoTurno({ ...nuevoTurno, servicioId: '' })}>
+                        ← Volver
+                      </button>
+                      <h4 style={{margin:0}}>Seleccioná la fecha</h4>
+                    </div>
                     <div className="fechas-grid">
                       {Array.from({length:14}).map((_,i) => {
                         const hoy = new Date();
@@ -407,11 +439,25 @@ const Turnos = () => {
                 )}
                 {/* Paso 3: Horario */}
                 {nuevoTurno.servicioId && nuevoTurno.fecha && !nuevoTurno.hora && (
-                  <HorarioSelectorAdmin fecha={nuevoTurno.fecha} onSelect={hora => setNuevoTurno({ ...nuevoTurno, hora })} />
+                  <div>
+                    <div style={{display:'flex',alignItems:'center',marginBottom:'10px'}}>
+                      <button className="btn btn-secondary" style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'7px 18px',fontWeight:'bold',fontSize:'1rem',transition:'0.2s',marginRight:'16px'}} onClick={() => setNuevoTurno({ ...nuevoTurno, fecha: '' })}>
+                        ← Volver
+                      </button>
+                      <h4 style={{margin:0}}>Seleccioná el horario</h4>
+                    </div>
+                    <HorarioSelectorAdmin fecha={nuevoTurno.fecha} onSelect={hora => setNuevoTurno({ ...nuevoTurno, hora })} />
+                  </div>
                 )}
                 {/* Paso 4: Datos cliente y resumen */}
                 {nuevoTurno.servicioId && nuevoTurno.fecha && nuevoTurno.hora && (
                   <form onSubmit={crearTurnoPresencial} style={{marginTop:'18px'}}>
+                    <div style={{display:'flex',alignItems:'center',marginBottom:'10px'}}>
+                      <button type="button" className="btn btn-secondary" style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'7px 18px',fontWeight:'bold',fontSize:'1rem',transition:'0.2s',marginRight:'16px'}} onClick={() => setNuevoTurno({ ...nuevoTurno, hora: '' })}>
+                        ← Volver
+                      </button>
+                      <h4 style={{margin:0}}>Datos del cliente</h4>
+                    </div>
                     <div className="form-grid" style={{gap:'18px'}}>
                       <div className="form-group">
                         <label className="form-label" style={{color:'#222',fontWeight:'bold'}}>Nombre del Cliente</label>
@@ -523,13 +569,47 @@ const Turnos = () => {
               const servicio = servicios[turno.servicioId];
               const usuario = usuarios[turno.usuarioId];
               const tachado = turno.estado === 'reservado' || turno.estado === 'cancelado';
+              // Badge de estado
+              let badgeLabel = '';
+              let badgeClass = '';
+              if (turno.estado === 'cancelado') {
+                badgeLabel = 'Cancelado';
+                badgeClass = 'danger';
+              } else if (turno.estado === 'confirmado') {
+                badgeLabel = 'Confirmado';
+                badgeClass = 'warning';
+              } else {
+                badgeLabel = 'Completado';
+                badgeClass = 'success';
+              }
               return (
                 <div key={turno.id} className="turno-admin-card">
                   <div className="turno-admin-info">
                     <div className="turno-admin-header">
                       <h3 style={tachado ? {textDecoration:'line-through',color:'#888'} : {}}>{servicio?.nombre}</h3>
-                      <span className={`badge badge-${turno.estado === 'confirmado' ? 'warning' : 'success'}`}> 
-                        {turno.estado === 'confirmado' ? 'Confirmado' : 'Completado'}
+                      <span
+                        className={`badge badge-${badgeClass}`}
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          borderRadius: 14,
+                          padding: '4px 18px',
+                          marginLeft: 10,
+                          background:
+                            badgeClass === 'danger'
+                              ? 'linear-gradient(90deg,#ff5e7e 0%,#ffb199 100%)'
+                              : badgeClass === 'warning'
+                              ? 'linear-gradient(90deg,#ffe259 0%,#ffa751 100%)'
+                              : 'linear-gradient(90deg,#43e97b 0%,#38f9d7 100%)',
+                          color: badgeClass === 'danger' ? '#fff' : '#222',
+                          border: 'none',
+                          boxShadow: badgeClass === 'danger' ? '0 2px 8px #ff5e7e33' : badgeClass === 'warning' ? '0 2px 8px #ffe25933' : '0 2px 8px #43e97b33',
+                          letterSpacing: 0.5,
+                          textShadow: badgeClass === 'danger' ? '0 1px 2px #c62828' : 'none',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {badgeLabel}
                       </span>
                     </div>
                     <div className="turno-admin-detalles" style={tachado ? {textDecoration:'line-through',color:'#888'} : {}}>

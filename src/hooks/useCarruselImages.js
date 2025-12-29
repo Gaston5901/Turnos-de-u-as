@@ -5,7 +5,7 @@ export default function useCarruselImages() {
   const [imagenes, setImagenes] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:3001/carrusel')
+    fetch('http://localhost:4000/api/carrusel')
       .then(res => res.json())
       .then(data => setImagenes(Array.isArray(data.imagenes) ? data.imagenes : []))
       .catch(() => setImagenes([]));

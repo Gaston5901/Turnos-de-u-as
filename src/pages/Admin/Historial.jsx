@@ -8,6 +8,64 @@ import './Admin.css';
    MODAL TURNO DETALLE — PREMIUM
 ===================================================== */
 function ModalTurnoDetalle({ turno, usuario, servicio, onClose }) {
+    // Mensaje informativo sobre el dinero y badge mejorado
+    let infoDinero = '';
+    let estadoLabel = turno.estado;
+    let estadoColor = '#1e7e34';
+    // Badge simple para estado principal
+    // Si el estado es 'completado' pero registroEstadistica es 'seña' y la fecha ya pasó, mostrar como 'expirado'
+    const fechaTurno = new Date(turno.fecha + 'T' + (turno.hora || '00:00') + ':00');
+    const ahora = new Date();
+    if (turno.estado === 'devuelto' && turno.seniaDevuelta) {
+      // Si es seña devuelta, registroEstadistica es 'seña' o 'ninguno' y la fecha ya pasó, es expirado
+      if ((turno.registroEstadistica === 'seña' || turno.registroEstadistica === 'ninguno') && fechaTurno < ahora) {
+        estadoLabel = 'expirado';
+        estadoColor = '#ff9800';
+        infoDinero = 'La seña fue devuelta al cliente, no se recibió dinero.';
+      } else if (turno.registroEstadistica === 'seña' || turno.registroEstadistica === 'ninguno') {
+        estadoLabel = 'cancelado';
+        estadoColor = '#e53935';
+        infoDinero = 'La seña fue devuelta al cliente, no se recibió dinero.';
+      } else if (turno.registroEstadistica === 'expirado') {
+        estadoLabel = 'expirado';
+        estadoColor = '#ff9800';
+        infoDinero = 'La seña fue devuelta al cliente, no se recibió dinero.';
+      } else {
+        estadoLabel = 'devuelto';
+        estadoColor = '#856404';
+        infoDinero = 'La seña fue devuelta al cliente.';
+      }
+    } else if (
+      turno.estado === 'completado' &&
+      turno.registroEstadistica === 'seña' &&
+      fechaTurno < ahora
+    ) {
+      estadoLabel = 'expirado';
+      estadoColor = '#ff9800';
+      infoDinero = 'Solo se recibió la seña, el cliente no asistió.';
+    } else if (turno.estado === 'completado' && turno.registroEstadistica === 'seña') {
+      estadoLabel = 'cancelado';
+      estadoColor = '#e53935';
+      infoDinero = 'Solo se recibió la seña, el cliente no completó el pago.';
+    } else if (turno.estado === 'cancelado') {
+      estadoLabel = 'cancelado';
+      estadoColor = '#e53935';
+    } else if (turno.estado === 'expirado' && turno.registroEstadistica === 'seña') {
+      estadoLabel = 'expirado';
+      estadoColor = '#ff9800';
+      infoDinero = 'Solo se recibió la seña, el cliente no asistió.';
+    } else if (turno.estado === 'expirado') {
+      estadoLabel = 'expirado';
+      estadoColor = '#ff9800';
+    } else if (turno.estado === 'completado') {
+      estadoLabel = 'completado';
+      estadoColor = '#388e3c';
+      infoDinero = 'El cliente pagó el total del servicio.';
+    } else if (turno.estado === 'confirmado') {
+      estadoLabel = 'confirmado';
+      estadoColor = '#1976d2';
+      infoDinero = 'Turno pendiente de pago final.';
+    }
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => (document.body.style.overflow = '');
@@ -18,6 +76,7 @@ function ModalTurnoDetalle({ turno, usuario, servicio, onClose }) {
       onClose();
     }
   };
+
 
   return (
     <>
@@ -85,36 +144,27 @@ function ModalTurnoDetalle({ turno, usuario, servicio, onClose }) {
         </div>
 
         <div style={{ fontSize: 16, lineHeight: 1.9, color: '#333' }}>
-          <div><b>Cliente:</b> {usuario?.nombre} <span style={{ color: '#888' }}>({usuario?.telefono})</span></div>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:2}}>
+            <b>Cliente:</b> {usuario?.nombre} <span style={{ color: '#888' }}>({usuario?.telefono})</span>
+            <span style={{ fontSize:13, fontWeight:600, color: estadoColor, background:'#fff', borderRadius:12, padding:'2px 12px', display:'inline-block', border:`1px solid ${estadoColor}33`}}>
+              {estadoLabel}
+            </span>
+          </div>
           <div><b>Fecha:</b> {format(new Date(turno.fecha + 'T00:00:00'), 'dd/MM/yyyy')} · <b>Hora:</b> {turno.hora} hs</div>
 
           <hr style={{ border: 'none', height: 1, background: 'linear-gradient(to right, transparent, #d13fa0, transparent)', margin: '14px 0' }} />
 
           <div><b>Total:</b> <span style={{ color: '#388e3c' }}>${turno.montoTotal.toLocaleString()}</span></div>
           <div><b>Pagado:</b> <span style={{ color: '#1976d2' }}>${turno.montoPagado.toLocaleString()}</span></div>
+
           <div><b>Resta:</b> <span style={{ color: '#ff9800' }}>${(turno.montoTotal - turno.montoPagado).toLocaleString()}</span></div>
+          {infoDinero && (
+            <div style={{margin:'6px 0 0 0',fontSize:14,color:'#ad1457',fontWeight:500}}>{infoDinero}</div>
+          )}
 
           <hr style={{ border: 'none', height: 1, background: 'linear-gradient(to right, transparent, #d13fa0, transparent)', margin: '14px 0' }} />
 
           <div><b>ID de pago:</b> <span style={{ color: '#d13fa0', fontWeight: 600 }}>{turno.pagoId}</span></div>
-          <div>
-            <b>Estado:</b>{' '}
-            <span
-              style={{
-                padding: '4px 12px',
-                borderRadius: 20,
-                fontSize: 13,
-                fontWeight: 600,
-                background:
-                  turno.estado === 'confirmado'
-                    ? 'linear-gradient(135deg,#fff3cd,#ffe69c)'
-                    : 'linear-gradient(135deg,#d1f7e2,#a5e6c8)',
-                color: turno.estado === 'confirmado' ? '#856404' : '#1e7e34'
-              }}
-            >
-              {turno.estado}
-            </span>
-          </div>
 
           <div style={{ fontSize: 13, color: '#999', marginTop: 10 }}>
             Creado: {format(new Date(turno.createdAt), 'dd/MM/yyyy HH:mm')}
@@ -214,7 +264,52 @@ const Historial = () => {
         {turnosFiltrados.map(turno => {
           const servicio = servicios[turno.servicioId];
           const usuario = usuarios[turno.usuarioId];
-
+          // Badge simple para estado principal
+          let estadoLabel = turno.estado;
+          let estadoColor = '#1e7e34';
+          const fechaTurno = new Date(turno.fecha + 'T' + (turno.hora || '00:00') + ':00');
+          const ahora = new Date();
+          if (turno.estado === 'devuelto' && turno.seniaDevuelta) {
+            // Si es seña devuelta, registroEstadistica es 'seña' o 'ninguno' y la fecha ya pasó, es expirado
+            if ((turno.registroEstadistica === 'seña' || turno.registroEstadistica === 'ninguno') && fechaTurno < ahora) {
+              estadoLabel = 'expirado';
+              estadoColor = '#ff9800';
+            } else if (turno.registroEstadistica === 'seña' || turno.registroEstadistica === 'ninguno') {
+              estadoLabel = 'cancelado';
+              estadoColor = '#e53935';
+            } else if (turno.registroEstadistica === 'expirado') {
+              estadoLabel = 'expirado';
+              estadoColor = '#ff9800';
+            } else {
+              estadoLabel = 'devuelto';
+              estadoColor = '#856404';
+            }
+          } else if (
+            turno.estado === 'completado' &&
+            turno.registroEstadistica === 'seña' &&
+            fechaTurno < ahora
+          ) {
+            estadoLabel = 'expirado';
+            estadoColor = '#ff9800';
+          } else if (turno.estado === 'completado' && turno.registroEstadistica === 'seña') {
+            estadoLabel = 'cancelado';
+            estadoColor = '#e53935';
+          } else if (turno.estado === 'cancelado') {
+            estadoLabel = 'cancelado';
+            estadoColor = '#e53935';
+          } else if (turno.estado === 'expirado' && turno.registroEstadistica === 'seña') {
+            estadoLabel = 'expirado';
+            estadoColor = '#ff9800';
+          } else if (turno.estado === 'expirado') {
+            estadoLabel = 'expirado';
+            estadoColor = '#ff9800';
+          } else if (turno.estado === 'completado') {
+            estadoLabel = 'completado';
+            estadoColor = '#388e3c';
+          } else if (turno.estado === 'confirmado') {
+            estadoLabel = 'confirmado';
+            estadoColor = '#1976d2';
+          }
           return (
             <div
               key={turno.id}
@@ -223,18 +318,25 @@ const Historial = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '16px 20px',
-                marginBottom: 14,
-                borderRadius: 18,
-                background: 'linear-gradient(180deg,#fff,#fff7fb)',
-                border: '1px solid #f3d1e6',
-                boxShadow: '0 8px 22px rgba(209,63,160,0.14)'
+                padding: '18px 24px',
+                marginBottom: 16,
+                borderRadius: 20,
+                background: 'linear-gradient(180deg,#fff,#fce4ec)',
+                border: '1.5px solid #f3d1e6',
+                boxShadow: '0 8px 22px rgba(209,63,160,0.10)',
+                position: 'relative',
+                transition: 'box-shadow 0.2s',
               }}
             >
-              <div>
-                <b style={{ color: '#d13fa0' }}>{servicio?.nombre}</b>
-                <div>{usuario?.nombre}</div>
-                <small>
+              <div style={{display:'flex',flexDirection:'column',gap:2}}>
+                <b style={{ color: '#d13fa0', fontSize:18 }}>{servicio?.nombre}</b>
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  <span style={{ color: '#333', fontWeight: 500 }}>{usuario?.nombre}</span>
+                  <span style={{ fontSize:13, fontWeight:600, color: estadoColor, background:'#fff', borderRadius:12, padding:'2px 12px', display:'inline-block', border:`1px solid ${estadoColor}33`}}>
+                    {estadoLabel}
+                  </span>
+                </div>
+                <small style={{ color: '#888' }}>
                   {format(new Date(turno.fecha+'T00:00:00'),'dd/MM/yyyy')} · {turno.hora} hs
                 </small>
               </div>
@@ -248,23 +350,33 @@ const Historial = () => {
                   border: 'none',
                   background: '#f5f5f5',
                   fontSize: 20,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px #d13fa022',
+                  transition: 'background 0.2s',
                 }}
+                title="Ver detalles"
               >
                 ⋮
               </button>
-
-              {modalTurnoId === turno.id && (
-                <ModalTurnoDetalle
-                  turno={turno}
-                  usuario={usuario}
-                  servicio={servicio}
-                  onClose={() => setModalTurnoId(null)}
-                />
-              )}
             </div>
           );
         })}
+
+        {/* ModalTurnoDetalle fuera del map, estable y sin parpadeo */}
+        {modalTurnoId && (() => {
+          const turnoSel = turnos.find(t => t.id === modalTurnoId);
+          if (!turnoSel) return null;
+          const servicioSel = servicios[turnoSel.servicioId];
+          const usuarioSel = usuarios[turnoSel.usuarioId];
+          return (
+            <ModalTurnoDetalle
+              turno={turnoSel}
+              usuario={usuarioSel}
+              servicio={servicioSel}
+              onClose={() => setModalTurnoId(null)}
+            />
+          );
+        })()}
       </div>
     </div>
   );

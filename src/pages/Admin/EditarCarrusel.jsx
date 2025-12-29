@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import './EditarCarrusel.css';
 
 
-// API real usando json-server
-const API_URL = 'http://localhost:3001/carrusel';
+
+// API real usando backend Express
+const API_URL = 'http://localhost:4000/api/carrusel';
 
 const api = {
   getImages: async () => {
@@ -13,7 +14,6 @@ const api = {
     return Array.isArray(data.imagenes) ? data.imagenes : [];
   },
   saveImages: async (images) => {
-    // PUT reemplaza el objeto completo
     const res = await fetch(API_URL, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -70,16 +70,23 @@ const EditarCarrusel = () => {
       setError('Solo puedes tener hasta 4 imágenes en el carrusel.');
       return;
     }
+    if (file.size > 1024 * 1024) { // 1MB
+      setError('La imagen es demasiado grande. Elige una de menos de 1MB.');
+      return;
+    }
     setSubiendo(true);
     setError('');
     try {
-      // Simulación: en un backend real, subirías el archivo y obtendrías la URL
-      // Aquí solo lo mostramos localmente
       const reader = new FileReader();
       reader.onloadend = async () => {
-        setImagenes([...imagenes, reader.result]);
-        await api.saveImages([...imagenes, reader.result]);
-        setSubiendo(false);
+        try {
+          await api.saveImages([...imagenes, reader.result]);
+          await cargarImagenes(); // recarga desde backend para asegurar persistencia
+        } catch (err) {
+          setError('Error al guardar la imagen en el servidor');
+        } finally {
+          setSubiendo(false);
+        }
       };
       reader.readAsDataURL(file);
     } catch (err) {
