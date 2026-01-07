@@ -32,7 +32,7 @@ export const usuariosAPI = {
   getAll: () => api.get('/usuarios'),
   getById: (id) => api.get(`/usuarios/${id}`),
   create: (data) => api.post('/usuarios', data),
-  update: (id, data) => api.patch(`/usuarios/${id}`, data),
+  update: (id, data) => api.put(`/usuarios/${id}`, data),
   login: (email, password) =>
     api.post('/usuarios/login', { email, password }).then(res => res.data),
 };

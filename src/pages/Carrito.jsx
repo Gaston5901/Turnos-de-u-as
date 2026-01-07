@@ -1,3 +1,4 @@
+import { crearPreferencia } from '../services/mercadoPago';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../store/useCarritoStore';
@@ -13,6 +14,30 @@ const Carrito = () => {
   const { items, eliminarDelCarrito, vaciarCarrito, calcularTotal, calcularSeña } = useCarrito();
   const { user } = useAuth();
   const [procesando, setProcesando] = useState(false);
+
+  // Botón para pagar con Mercado Pago
+  const pagarConMercadoPago = async () => {
+    if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
+    setProcesando(true);
+    try {
+      const carritoMP = items.map(item => ({
+        titulo: item.servicio.nombre,
+        precio: item.servicio.precio / 2, // Seña 50%
+        cantidad: 1
+      }));
+      
+      const data = await crearPreferencia(carritoMP);
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        toast.error('No se pudo iniciar el pago');
+      }
+    } catch (e) {
+      toast.error('Error al conectar con Mercado Pago');
+    } finally {
+      setProcesando(false);
+    }
+  };
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
@@ -121,7 +146,10 @@ const Carrito = () => {
                 <p>💰 Resto en el estudio</p>
               </div>
               <button className="btn btn-primary btn-pagar" onClick={procesarPago} disabled={procesando}>
-                {procesando ? (<><div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>Procesando...</>) : (<><CreditCard size={20} />Pagar ${calcularSeña().toLocaleString()}</>)}
+                {procesando ? (<><div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>Procesando...</>) : (<><CreditCard size={20} />Pagar (prueba local)</>)}
+              </button>
+              <button className="btn btn-secondary btn-pagar" style={{marginTop:8}} onClick={pagarConMercadoPago} disabled={procesando}>
+                {procesando ? (<><div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>Procesando...</>) : (<><CreditCard size={20} />Pagar con Mercado Pago</>)}
               </button>
               <button className="btn btn-secondary mt-2" onClick={() => navigate('/reservar')}>Agregar más servicios</button>
             </div>

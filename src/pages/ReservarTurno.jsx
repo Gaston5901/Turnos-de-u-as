@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { serviciosAPI, horariosAPI } from '../services/api';
+// import { crearPreferencia as crearPreferenciaMP } from '../services/mercadoPago';
 import { useCarrito } from '../store/useCarritoStore';
 import { useAuth } from '../context/AuthContext';
 import { Calendar, Clock, Check } from 'lucide-react';
@@ -356,8 +357,9 @@ const ReservarTurno = () => {
                     <div className="anuncio-local">Dirección: Barrio San Martín mza A casa 5</div>
 
                     <button className="btn btn-primary btn-reservar" onClick={agregarAlCarritoYContinuar}>
-                      Continuar al pago
+                      Continuar al pago (carrito)
                     </button>
+
                   </div>
                 )}
               </>

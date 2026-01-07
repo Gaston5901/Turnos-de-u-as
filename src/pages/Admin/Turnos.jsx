@@ -17,6 +17,7 @@ const Turnos = () => {
       nombre: usuario.nombre || '',
       telefono: usuario.telefono || '',
       email: usuario.email || '',
+      rol: usuario.rol || 'cliente',
     });
     setEditando(true);
   };
@@ -34,6 +35,7 @@ const Turnos = () => {
         nombre: turnoEditar.nombre,
         telefono: turnoEditar.telefono,
         email: turnoEditar.email,
+        rol: turnoEditar.rol || 'cliente',
       });
       // Actualiza turno con todos los datos relevantes
       await turnosAPI.update(turnoEditar.id, {
@@ -565,81 +567,92 @@ const Turnos = () => {
 
         <div className="turnos-tabla">
           {turnosFiltrados.length > 0 ? (
-            turnosFiltrados.map((turno) => {
-              const servicio = servicios[turno.servicioId];
-              const usuario = usuarios[turno.usuarioId];
-              const tachado = turno.estado === 'reservado' || turno.estado === 'cancelado';
-              // Badge de estado
-              let badgeLabel = '';
-              let badgeClass = '';
-              if (turno.estado === 'cancelado') {
-                badgeLabel = 'Cancelado';
-                badgeClass = 'danger';
-              } else if (turno.estado === 'confirmado') {
-                badgeLabel = 'Confirmado';
-                badgeClass = 'warning';
-              } else {
-                badgeLabel = 'Completado';
-                badgeClass = 'success';
-              }
-              return (
-                <div key={turno.id} className="turno-admin-card">
-                  <div className="turno-admin-info">
-                    <div className="turno-admin-header">
-                      <h3 style={tachado ? {textDecoration:'line-through',color:'#888'} : {}}>{servicio?.nombre}</h3>
-                      <span
-                        className={`badge badge-${badgeClass}`}
+            <div className="turnos-admin-list" style={{marginTop:'18px'}}>
+              {turnosFiltrados.map((turno) => {
+                const servicio = servicios[turno.servicioId];
+                const usuario = usuarios[turno.usuarioId];
+                // Badge de estado y color
+                let estadoLabel = turno.estado;
+                let estadoColor = '#1e7e34';
+                if (turno.estado === 'cancelado') {
+                  estadoLabel = 'Cancelado';
+                  estadoColor = '#e53935';
+                } else if (turno.estado === 'confirmado') {
+                  estadoLabel = 'Confirmado';
+                  estadoColor = '#1976d2';
+                } else if (turno.estado === 'completado') {
+                  estadoLabel = 'Completado';
+                  estadoColor = '#388e3c';
+                }
+                return (
+                  <div key={turno.id} className="turno-admin-card compacto" style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '18px 24px',
+                    marginBottom: 16,
+                    borderRadius: 20,
+                    background: 'linear-gradient(180deg,#fff,#fce4ec)',
+                    border: '1.5px solid #f3d1e6',
+                    boxShadow: '0 8px 22px rgba(209,63,160,0.10)',
+                    position: 'relative',
+                    transition: 'box-shadow 0.2s',
+                  }}>
+                    <div style={{display:'flex',flexDirection:'column',gap:2}}>
+                      <b style={{ color: '#d13fa0', fontSize:18 }}>{servicio?.nombre}</b>
+                      <div style={{display:'flex',alignItems:'center',gap:8}}>
+                        <span style={{ color: '#333', fontWeight: 500 }}>{usuario?.nombre}</span>
+                        <span style={{ fontSize:13, fontWeight:600, color: estadoColor, background:'#fff', borderRadius:12, padding:'2px 12px', display:'inline-block', border:`1px solid ${estadoColor}33`}}>
+                          {estadoLabel}
+                        </span>
+                      </div>
+                      <small style={{ color: '#888' }}>
+                        {format(new Date(turno.fecha+'T00:00:00'),'dd/MM/yyyy')} · {turno.hora} hs
+                      </small>
+                      <div style={{fontSize:14,marginTop:4}}>
+                        <span style={{color:'#888'}}>Total:</span> <span style={{color:'#388e3c',fontWeight:600}}>${turno.montoTotal.toLocaleString()}</span>
+                        <span style={{color:'#888',margin:'0 8px'}}>Pagado:</span> <span style={{color:'#1976d2',fontWeight:600}}>${turno.montoPagado.toLocaleString()}</span>
+                        <span style={{color:'#888',margin:'0 8px'}}>Resta:</span> <span style={{color:'#ff9800',fontWeight:600}}>${(turno.montoTotal - turno.montoPagado).toLocaleString()}</span>
+                      </div>
+                      <div style={{fontSize:12,color:'#bbb',marginTop:2}}>ID: {turno.pagoId}</div>
+                    </div>
+                    <div style={{display:'flex',alignItems:'center',gap:10, height:'100%'}}>
+                      <button
+                        className="btn-accion editar"
                         style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          borderRadius: 14,
-                          padding: '4px 18px',
-                          marginLeft: 10,
-                          background:
-                            badgeClass === 'danger'
-                              ? 'linear-gradient(90deg,#ff5e7e 0%,#ffb199 100%)'
-                              : badgeClass === 'warning'
-                              ? 'linear-gradient(90deg,#ffe259 0%,#ffa751 100%)'
-                              : 'linear-gradient(90deg,#43e97b 0%,#38f9d7 100%)',
-                          color: badgeClass === 'danger' ? '#fff' : '#222',
-                          border: 'none',
-                          boxShadow: badgeClass === 'danger' ? '0 2px 8px #ff5e7e33' : badgeClass === 'warning' ? '0 2px 8px #ffe25933' : '0 2px 8px #43e97b33',
-                          letterSpacing: 0.5,
-                          textShadow: badgeClass === 'danger' ? '0 1px 2px #c62828' : 'none',
-                          transition: 'all 0.2s',
+                          background:'linear-gradient(135deg,#ffb6ea 0%,#ff6a88 100%)',
+                          color:'#fff',
+                          border:'none',
+                          borderRadius:'50%',
+                          width:'54px',
+                          height:'54px',
+                          minWidth:'54px',
+                          minHeight:'54px',
+                          fontWeight:'bold',
+                          fontSize:'1.08rem',
+                          boxShadow:'0 4px 18px #ffb6ea55',
+                          transition:'all 0.18s',
+                          display:'flex',
+                          alignItems:'center',
+                          justifyContent:'center',
+                          cursor:'pointer',
+                          position:'relative',
+                          overflow:'hidden',
+                          outline:'none',
+                          borderColor:'transparent',
                         }}
+                        onClick={() => handleEditarTurno(turno)}
+                        title="Editar"
+                        onMouseOver={e => e.currentTarget.style.background='linear-gradient(135deg,#ff6a88 0%,#ffb6ea 100%)'}
+                        onMouseOut={e => e.currentTarget.style.background='linear-gradient(135deg,#ffb6ea 0%,#ff6a88 100%)'}
                       >
-                        {badgeLabel}
-                      </span>
-                    </div>
-                    <div className="turno-admin-detalles" style={tachado ? {textDecoration:'line-through',color:'#888'} : {}}>
-                      <p>
-                        <strong>Cliente:</strong> {usuario?.nombre} | {usuario?.telefono}
-                      </p>
-                      <p>
-                        <strong>Fecha:</strong> {format(new Date(turno.fecha + 'T00:00:00'), 'dd/MM/yyyy')} | 
-                        <strong> Hora:</strong> {turno.hora} hs
-                      </p>
-                      <p>
-                        <strong>Total:</strong> ${turno.montoTotal.toLocaleString()} | 
-                        <strong> Pagado:</strong> ${turno.montoPagado.toLocaleString()} | 
-                        <strong> Resta:</strong> {(turno.montoTotal - turno.montoPagado).toLocaleString()}
-                      </p>
-                      <p className="turno-id">ID: {turno.pagoId}</p>
+                        <svg width="26" height="26" fill="none" viewBox="0 0 24 24"><path d="M4 21h17" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><path d="M15.232 5.232a3 3 0 1 1 4.243 4.243L7.5 21.5 3 22.5l1-4.5 11.232-11.232Z" stroke="#fff" strokeWidth="2"/></svg>
+                      </button>
                     </div>
                   </div>
-                  <div className="turno-admin-acciones">
-                    <button
-                      className="btn-accion editar"
-                      onClick={() => handleEditarTurno(turno)}
-                      title="Editar"
-                    >
-                      Editar
-                    </button>
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           ) : (
             <p className="no-data">No se encontraron turnos</p>
           )}
