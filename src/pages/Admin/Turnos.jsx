@@ -161,14 +161,16 @@ const Turnos = () => {
 
   const crearTurnoPresencial = async (e) => {
     e.preventDefault();
+    let passwordGenerada = null;
     try {
       let usuario = Object.values(usuarios).find(u => u.email === nuevoTurno.email);
       if (!usuario) {
+        passwordGenerada = 'temporal123';
         const nuevoUsuario = {
           nombre: nuevoTurno.nombre?.trim() || '',
           email: nuevoTurno.email?.trim() || '',
           telefono: nuevoTurno.telefono?.trim() || '',
-          password: 'temporal123',
+          password: passwordGenerada,
           rol: 'cliente',
         };
         console.log('Payload usuario:', nuevoUsuario);
@@ -204,10 +206,10 @@ const Turnos = () => {
         montoPagado: montoSeña,
         montoTotal: servicio.precio,
         createdAt: new Date().toISOString(),
-        // Extras para frontend
         email: usuario.email,
         nombre: usuario.nombre,
         telefono: usuario.telefono,
+        ...(passwordGenerada ? { passwordGenerada } : {})
       };
       await turnosAPI.create(turnoData);
       toast.success('Turno creado exitosamente con seña pagada');

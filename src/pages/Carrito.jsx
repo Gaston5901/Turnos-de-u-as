@@ -49,7 +49,10 @@ const Carrito = () => {
       const serviciosEmail = [];
       for (const item of items) {
         const turnoData = {
-          usuario: user.id,
+          // usuario: user.id, // NO enviar este campo
+          email: user.email,
+          nombre: user.nombre,
+          telefono: user.telefono || '',
           servicio: item.servicio.id,
           fecha: item.fecha,
           hora: item.hora,

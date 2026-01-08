@@ -61,7 +61,8 @@ export const AuthProvider = ({ children }) => {
       };
 
       const response = await usuariosAPI.create(newUser);
-      const userWithToken = { ...response.data, token: 'mock-token-' + Date.now() };
+      // Usar _id real de MongoDB si existe
+      const userWithToken = { ...response.data, _id: response.data._id || response.data.id, token: 'mock-token-' + Date.now() };
       localStorage.setItem('user', JSON.stringify(userWithToken));
       setUser(userWithToken);
       toast.success('¡Registro exitoso!');
