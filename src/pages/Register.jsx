@@ -63,7 +63,7 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label id="nombre" className="form-label">Nombre Completo</label>
+            <label id="nombre" className="form-label">Nombre de Usuario</label>
             <input
               type="text"
               name="nombre"

@@ -25,11 +25,11 @@ const Footer = () => {
         <div className="footer-section">
           <h3 className="footer-title">Enlaces</h3>
           <ul className="footer-links">
-            <li><Link to="/">Inicio</Link></li>
-            <li><Link to="/servicios">Servicios</Link></li>
-            <li><Link to="/reservar">Reservar Turno</Link></li>
-            <li><Link to="/mis-turnos">Mis Turnos</Link></li>
-            <li><Link to="/admin">Admin</Link></li>
+            <li><Link to="/" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Inicio</Link></li>
+            <li><Link to="/servicios" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Servicios</Link></li>
+            <li><Link to="/reservar" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Reservar Turno</Link></li>
+            <li><Link to="/mis-turnos" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Mis Turnos</Link></li>
+            <li><Link to="/admin" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Admin</Link></li>
           </ul>
         </div>
 

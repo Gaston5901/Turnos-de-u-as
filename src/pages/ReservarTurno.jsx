@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { serviciosAPI, horariosAPI } from '../services/api';
 // import { crearPreferencia as crearPreferenciaMP } from '../services/mercadoPago';
@@ -13,6 +13,9 @@ import './ReservarTurno.css';
 
 
 const ReservarTurno = () => {
+  const fechaInicioRef = useRef(null);
+  const resumenRef = useRef(null);
+  const horaInicioRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { agregarAlCarrito } = useCarrito();
@@ -89,12 +92,24 @@ const ReservarTurno = () => {
   const seleccionarServicio = (servicio) => {
     setServicioSeleccionado(servicio);
     setPaso(2);
+    setTimeout(() => {
+      if (fechaInicioRef.current) {
+        const y = fechaInicioRef.current.getBoundingClientRect().top + window.scrollY - 320;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 200);
   };
 
   const seleccionarFecha = (fecha) => {
     setFechaSeleccionada(fecha);
     setHoraSeleccionada('');
     setPaso(3);
+    setTimeout(() => {
+      if (horaInicioRef.current) {
+        const y = horaInicioRef.current.getBoundingClientRect().top + window.scrollY - 320;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 200);
   };
 
   const seleccionarHora = (hora, ocupado = false) => {
@@ -104,13 +119,18 @@ const ReservarTurno = () => {
     }
 
     setHoraSeleccionada(hora);
-
-    if (servicioSeleccionado && fechaSeleccionada) {
-      toast.info(
-        `Turno seleccionado: ${servicioSeleccionado.nombre} - ${format(new Date(fechaSeleccionada + 'T00:00:00'), 'dd/MM')} ${hora} hs. Seña 50% y resto en el estudio.`,
-        { autoClose: 6000 }
-      );
-    }
+    setTimeout(() => {
+  if (resumenRef.current) {
+    const y = resumenRef.current.getBoundingClientRect().top + window.scrollY - 80; // Cambia 120 por el espacio que quieras
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+}, 200);
+    // if (servicioSeleccionado && fechaSeleccionada) {
+    //   toast.info(
+    //     `Turno seleccionado: ${servicioSeleccionado.nombre} - ${format(new Date(fechaSeleccionada + 'T00:00:00'), 'dd/MM')} ${hora} hs. Seña 50% y resto en el estudio.`,
+    //     { autoClose: 6000 }
+    //   );
+    // }
   };
 
   const buscarProximoDisponible = async () => {
@@ -146,13 +166,14 @@ const ReservarTurno = () => {
           horaSeleccionada
         }));
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       toast.info('Iniciá sesión o creá tu cuenta para continuar');
       navigate('/login');
       return;
     }
     // Si está logueado, flujo normal
     agregarAlCarrito(servicioSeleccionado, fechaSeleccionada, horaSeleccionada);
-    navigate('/carrito');
+    navigate('/carrito', { state: { scrollToResumen: true } });
   };
 
   const generarFechasDisponibles = () => {
@@ -236,7 +257,7 @@ const ReservarTurno = () => {
 
         {/* PASO 2 – FECHAS */}
         {paso === 2 && servicioSeleccionado && (
-          <div className="paso-container">
+          <div className="paso-container" ref={fechaInicioRef}>
             <h2 className="paso-title">
               <Calendar size={28} />
               Seleccioná la fecha
@@ -275,7 +296,7 @@ const ReservarTurno = () => {
 
         {/* PASO 3 – HORARIOS */}
         {paso === 3 && servicioSeleccionado && (
-          <div className="paso-container">
+          <div className="paso-container" ref={horaInicioRef}>
             <h2 className="paso-title">
               <Clock size={28} />
               Seleccioná el horario
@@ -322,7 +343,7 @@ const ReservarTurno = () => {
                 )}
 
                 {horaSeleccionada && estadoHorarios.disponibles.includes(horaSeleccionada) && (
-                  <div className="resumen-reserva">
+                  <div className="resumen-reserva" ref={resumenRef}>
                     <h3>Resumen de tu reserva</h3>
 
                     <div className="resumen-item">

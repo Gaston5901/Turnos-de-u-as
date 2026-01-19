@@ -1,3 +1,44 @@
+@media (max-width: 768px) {
+  .ir-reservar-mobile {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: linear-gradient(90deg, #e91e63, #f8bbd0);
+    padding: 12px 0 10px 0;
+    display: flex !important;
+    justify-content: center;
+    box-shadow: 0 -2px 16px rgba(233,30,99,0.10);
+    animation: slideUp 0.4s;
+  }
+  .ir-reservar-mobile button {
+    background: #fff;
+    color: #e91e63;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 24px;
+    padding: 10px 28px;
+    box-shadow: 0 2px 8px rgba(233,30,99,0.10);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .ir-reservar-mobile button:hover {
+    background: #f8bbd0;
+    color: #ffffff;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+.ir-reservar-mobile {
+  display: none;
+}
 .mis-turnos-page {
   min-height: calc(100vh - 200px);
   padding-bottom: 60px;

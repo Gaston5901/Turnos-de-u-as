@@ -115,6 +115,7 @@ const Turnos = () => {
   const [filtro, setFiltro] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [creando, setCreando] = useState(false);
   const [nuevoTurno, setNuevoTurno] = useState({
     nombre: '',
     telefono: '',
@@ -161,6 +162,8 @@ const Turnos = () => {
 
   const crearTurnoPresencial = async (e) => {
     e.preventDefault();
+    if (creando) return;
+    setCreando(true);
     let passwordGenerada = null;
     try {
       let usuario = Object.values(usuarios).find(u => u.email === nuevoTurno.email);
@@ -226,6 +229,8 @@ const Turnos = () => {
     } catch (error) {
       toast.error('Error al crear el turno');
       console.error(error);
+    } finally {
+      setCreando(false);
     }
   };
 
@@ -477,7 +482,33 @@ const Turnos = () => {
                       </div>
                     </div>
                     <div className="form-actions" style={{display:'flex',gap:'12px',padding:'18px 0',borderTop:'1px solid #eee',background:'rgba(255,255,255,0.95)',justifyContent:'flex-end',position:'sticky',bottom:0,zIndex:1}}>
-                      <button type="submit" className="btn btn-primary" style={{background:'linear-gradient(90deg,#d13fa0,#e7b2e6)',color:'#fff',border:'none',borderRadius:'8px',padding:'10px 22px',fontWeight:'bold',fontSize:'1rem',boxShadow:'0 2px 8px rgba(209,63,160,0.08)',transition:'0.2s'}}>Crear Turno</button>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={creando}
+                        style={{
+                          background: 'linear-gradient(90deg,#d13fa0,#e7b2e6)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '10px 22px',
+                          fontWeight: 'bold',
+                          fontSize: '1rem',
+                          boxShadow: '0 2px 8px rgba(209,63,160,0.08)',
+                          transition: '0.2s',
+                          opacity: creando ? 0.7 : 1,
+                          cursor: creando ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {creando ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{marginRight:8}}></span>
+                            Creando...
+                          </>
+                        ) : (
+                          'Crear Turno'
+                        )}
+                      </button>
                       <button type="button" className="btn btn-secondary" style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'10px 22px',fontWeight:'bold',fontSize:'1rem',transition:'0.2s'}} onClick={() => setMostrarFormulario(false)}>Cancelar</button>
                     </div>
                   </form>

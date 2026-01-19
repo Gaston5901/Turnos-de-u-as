@@ -77,14 +77,15 @@ const Navbar = () => {
               <span style={{fontWeight: 'bold', fontSize: '1.2rem'}}>Admin</span>
             </div>
             <nav className="sidebar-nav">
-              <NavLink to="/admin/panel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <LayoutDashboard size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Panel</span>}</NavLink>
-              <NavLink to="/admin/panel-trabajo" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <Menu size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Trabajo</span>}</NavLink>
-              <NavLink to="/admin/turnos" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <Calendar size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Turnos</span>}</NavLink>
-              <NavLink to="/admin/historial" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <FileText size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Historial</span>}</NavLink>
-              <NavLink to="/admin/estadisticas" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <TrendingUp size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Estadísticas</span>}</NavLink>
-              <NavLink to="/admin/servicios-admin" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <ShoppingCart size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Servicios</span>}</NavLink>
-              <NavLink to="/admin/editar-carrusel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <ImageIcon size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Editar Carrusel</span>}</NavLink>
-              <NavLink to="/admin/usuarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`}> <User size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Usuarios</span>}</NavLink>
+              <NavLink to="/admin/panel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <LayoutDashboard size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Panel</span>}</NavLink>
+              <NavLink to="/admin/panel-trabajo" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <Menu size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Trabajo</span>}</NavLink>
+              <NavLink to="/admin/turnos" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <Calendar size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Turnos</span>}</NavLink>
+              <NavLink to="/admin/historial" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <FileText size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Historial</span>}</NavLink>
+              <NavLink to="/admin/estadisticas" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <TrendingUp size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Estadísticas</span>}</NavLink>
+              <NavLink to="/admin/servicios-admin" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <ShoppingCart size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Servicios</span>}</NavLink>
+              <NavLink to="/admin/editar-carrusel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <ImageIcon size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Editar Carrusel</span>}</NavLink>
+              <NavLink to="/admin/editar-horarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <Calendar size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Actualizar Horarios</span>}</NavLink>
+              <NavLink to="/admin/usuarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => window.scrollTo({top:0,behavior:'smooth'})}> <User size={20} /> {sidebarHover && <span style={{marginLeft:8}}>Usuarios</span>}</NavLink>
             </nav>
             <button className="sidebar-logout" onClick={logout}>
               <LogOut size={18} />
@@ -108,14 +109,15 @@ const Navbar = () => {
                 <button onClick={handleSidebarClose} style={{background: 'none', border: 'none', cursor: 'pointer', padding: 0}}><X size={24} /></button>
               </div>
               <nav className="sidebar-nav">
-                <NavLink to="/admin/panel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <LayoutDashboard size={20} /> <span style={{marginLeft:8}}>Panel</span></NavLink>
-                <NavLink to="/admin/panel-trabajo" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <Menu size={20} /> <span style={{marginLeft:8}}>Trabajo</span></NavLink>
-                <NavLink to="/admin/turnos" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <Calendar size={20} /> <span style={{marginLeft:8}}>Turnos</span></NavLink>
-                <NavLink to="/admin/historial" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <FileText size={20} /> <span style={{marginLeft:8}}>Historial</span></NavLink>
-                <NavLink to="/admin/estadisticas" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <TrendingUp size={20} /> <span style={{marginLeft:8}}>Estadísticas</span></NavLink>
-                <NavLink to="/admin/servicios-admin" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <ShoppingCart size={20} /> <span style={{marginLeft:8}}>Servicios</span></NavLink>
-                <NavLink to="/admin/editar-carrusel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <ImageIcon size={20} style={{marginRight:8}} /> <span>Editar Carrusel</span></NavLink>
-                <NavLink to="/admin/usuarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={handleSidebarClose}> <User size={20} /> <span style={{marginLeft:8}}>Usuarios</span></NavLink>
+                <NavLink to="/admin/panel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <LayoutDashboard size={20} /> <span style={{marginLeft:8}}>Panel</span></NavLink>
+                <NavLink to="/admin/panel-trabajo" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <Menu size={20} /> <span style={{marginLeft:8}}>Trabajo</span></NavLink>
+                <NavLink to="/admin/turnos" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <Calendar size={20} /> <span style={{marginLeft:8}}>Turnos</span></NavLink>
+                <NavLink to="/admin/historial" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <FileText size={20} /> <span style={{marginLeft:8}}>Historial</span></NavLink>
+                <NavLink to="/admin/estadisticas" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <TrendingUp size={20} /> <span style={{marginLeft:8}}>Estadísticas</span></NavLink>
+                <NavLink to="/admin/servicios-admin" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <ShoppingCart size={20} /> <span style={{marginLeft:8}}>Servicios</span></NavLink>
+                <NavLink to="/admin/editar-carrusel" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <ImageIcon size={20} style={{marginRight:8}} /> <span>Editar Carrusel</span></NavLink>
+                <NavLink to="/admin/editar-horarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <Calendar size={20} /> <span style={{marginLeft:8}}>Actualizar Horarios</span></NavLink>
+                <NavLink to="/admin/usuarios" className={({isActive}) => `sidebar-link${isActive ? ' active' : ''}`} onClick={() => { handleSidebarClose(); window.scrollTo({top:0,behavior:'smooth'}); }}> <User size={20} /> <span style={{marginLeft:8}}>Usuarios</span></NavLink>
               </nav>
               <button className="sidebar-logout" onClick={() => { logout(); handleSidebarClose(); }}>
                 <LogOut size={18} />
@@ -143,13 +145,13 @@ const Navbar = () => {
         <div className={`navbar-menu ${isOpen ? 'active' : ''}`}>
           {(!user || !isAdmin()) && (
             <>
-              <NavLink end to="/" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+              <NavLink end to="/" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => { setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }}>
                 Inicio
               </NavLink>
-              <NavLink to="/servicios" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+              <NavLink to="/servicios" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => { setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }}>
                 Servicios
               </NavLink>
-              <NavLink to="/reservar" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+              <NavLink to="/reservar" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => { setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }}>
                 Reservar Turno
               </NavLink>
             </>
@@ -157,12 +159,12 @@ const Navbar = () => {
           {user ? (
             <>
               {!isAdmin() && (
-                <NavLink to="/mis-turnos" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                <NavLink to="/mis-turnos" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => { setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }}>
                   Mis Turnos
                 </NavLink>
               )}
               {!isAdmin() && (
-                <NavLink to="/carrito" className={({isActive}) => `navbar-link cart-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                <NavLink to="/carrito" className={({isActive}) => `navbar-link cart-link ${isActive ? 'active' : ''}`} onClick={() => { setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }}>
                   <ShoppingCart size={20} />
                   {cantidadItems > 0 && <span className="cart-badge">{cantidadItems}</span>}
                 </NavLink>
@@ -178,10 +180,10 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <NavLink to="/login" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+              <NavLink to="/login" className={({isActive}) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => { setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }}>
                 Iniciar Sesión
               </NavLink>
-              <NavLink to="/nosotros" className={({isActive}) => `btn btn-primary navbar-btn ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+              <NavLink to="/nosotros" className={({isActive}) => `btn btn-primary navbar-btn ${isActive ? 'active' : ''}`} onClick={() => { setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }}>
                 Nosotros
               </NavLink>
             </>

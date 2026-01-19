@@ -20,6 +20,7 @@ import PanelTrabajo from './pages/Admin/PanelTrabajo';
 import Historial from './pages/Admin/Historial';
 import ServiciosAdmin from './pages/Admin/ServiciosAdmin';
 import EditarCarrusel from './pages/Admin/EditarCarrusel';
+import EditarHorariosAdmin from './pages/Admin/EditarHorariosAdmin';
 import UsuariosAdmin from './pages/Admin/UsuariosAdmin';
 import RecuperarPassword from './pages/RecuperarPassword';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
@@ -96,6 +97,17 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                
+                <Route
+                  path="/admin/editar-horarios"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <EditarHorariosAdmin />
+                    </ProtectedRoute>
+                  }
+                />
+
+
                 <Route
                   path="/admin/usuarios"
                   element={

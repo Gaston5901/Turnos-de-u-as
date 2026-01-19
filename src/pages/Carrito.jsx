@@ -1,5 +1,5 @@
 import { crearPreferencia } from '../services/mercadoPago';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../store/useCarritoStore';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,17 @@ import './Carrito.css';
 const Carrito = () => {
   const navigate = useNavigate();
   const { items, eliminarDelCarrito, vaciarCarrito, calcularTotal, calcularSeña } = useCarrito();
+  const resumenRef = useRef(null);
+    useEffect(() => {
+      if (window.history.state && window.history.state.usr && window.history.state.usr.scrollToResumen) {
+        setTimeout(() => {
+          if (resumenRef.current) {
+            const y = resumenRef.current.getBoundingClientRect().top + window.scrollY - 80;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        }, 200);
+      }
+    }, []);
   const { user } = useAuth();
   const [procesando, setProcesando] = useState(false);
 
@@ -136,7 +147,7 @@ const Carrito = () => {
             ))}
           </div>
 
-          <div className="carrito-resumen">
+          <div className="carrito-resumen" ref={resumenRef}>
             <div className="resumen-card">
               <h3>Resumen de Compra</h3>
               <div className="resumen-detalle"><span>Cantidad de servicios:</span><strong>{items.length}</strong></div>

@@ -196,9 +196,16 @@ const MisTurnos = () => {
             document.body
           )}
         </div>
+
+      {/* Botón flotante solo para móviles */}
+
+      <div className="ir-reservar-mobile">
+        <button onClick={() => window.location.href = '/reservar'}>
+          <span role="img" aria-label="Calendario">📅</span> Reservar nuevo turno
+        </button>
       </div>
-    </>
-  );
+    </div>
+  </>);
 }
 
 export default MisTurnos;
