@@ -628,7 +628,7 @@ const RankingServicios = ({ stats }) => {
                 </div>
               </div>
               <div style={{width:'100%'}}>
-                <span style={{fontSize:14,color:'#888'}}>Ganancias (señas)</span>
+                <span style={{fontSize:14,color:'#888'}}>Ganancias </span>
                 <div style={{
                   background:'#c8e6c9',
                   borderRadius:8,

@@ -1,9 +1,25 @@
 // Componente para acciones de expirados con menú de tres puntos al lado del tilde
+import Swal from 'sweetalert2';
 function ExpiradoAcciones({ turno, onCompletar, onDevolverSenia }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const handleCompletar = async () => {
+    const result = await Swal.fire({
+      title: '¿Seguro que quieres completar solo la seña?',
+      text: 'Esta acción marcará el turno como completado solo con la seña.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#38b000',
+      cancelButtonColor: '#d13fa0',
+      confirmButtonText: 'Confirmar',
+      cancelButtonText: 'Cancelar',
+    });
+    if (result.isConfirmed) {
+      onCompletar(turno);
+    }
+  };
   return (
     <div style={{position:'relative',display:'flex',alignItems:'center',gap:'6px'}}>
-      <button className="btn-accion completar" onClick={()=>onCompletar(turno)} title="Completar solo seña">
+      <button className="btn-accion completar" onClick={handleCompletar} title="Completar solo seña">
         <CheckCircle size={20} />
       </button>
       <button
@@ -90,18 +106,56 @@ const PanelTrabajo = () => {
     return lista.length ? lista.map(t => {
       const s = servicios[t.servicioId];
       const u = usuarios[t.usuarioId];
+      const precioTotal = t.montoTotal ?? s?.precio ?? '';
       return (
         <div key={t.id} className="turno-cancelado-item" style={{background:'#fff3f3',border:'1.5px solid #e57373',borderRadius:'12px',padding:'12px 18px',marginBottom:'10px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <div>
             <div style={{fontWeight:'bold',color:'#e53935'}}>{t.hora} - {s?.nombre}</div>
             <div style={{fontSize:'1rem',color:'#ad1457'}}>{u?.nombre} / {u?.telefono}</div>
             <div className="turno-id" style={{fontSize:'0.9em',color:'#888'}}>ID: {t.pagoId}</div>
+            <div className="turno-precio" style={{fontWeight:'bold',color:'#38b000',marginTop:'2px'}}>Total: ${precioTotal}</div>
           </div>
           <div style={{display:'flex',gap:'8px'}}>
-            <button className="btn-accion completar" onClick={()=>marcarCompletado(t)} title="Completar solo seña">
+            <button
+              className="btn-accion completar"
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: '¿Seguro que quieres completar solo la seña?',
+                  text: 'Esta acción marcará el turno como completado solo con la seña.',
+                  icon: 'question',
+                  showCancelButton: true,
+                  confirmButtonColor: '#38b000',
+                  cancelButtonColor: '#d13fa0',
+                  confirmButtonText: 'Confirmar',
+                  cancelButtonText: 'Cancelar',
+                });
+                if (result.isConfirmed) {
+                  marcarCompletado(t);
+                }
+              }}
+              title="Completar solo seña"
+            >
               <CheckCircle size={20} /> Completar seña
             </button>
-            <button className="btn-accion cancelar" onClick={()=>devolverSenia(t)} title="Devolver seña">
+            <button
+              className="btn-accion cancelar"
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: '¿Seguro que quieres devolver la seña?',
+                  text: 'Esta acción marcará la seña como devuelta y no se registrará en estadísticas.',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#d13fa0',
+                  cancelButtonColor: '#888',
+                  confirmButtonText: 'Confirmar',
+                  cancelButtonText: 'Cancelar',
+                });
+                if (result.isConfirmed) {
+                  devolverSenia(t);
+                }
+              }}
+              title="Devolver seña"
+            >
               Devolver seña
             </button>
           </div>
@@ -148,6 +202,8 @@ const PanelTrabajo = () => {
       const s = servicios[t.servicioId];
       const u = usuarios[t.usuarioId];
       const itemClass = tipo === 'expirados' ? 'turno-expirado-item' : 'turno-hoy-item';
+      // Determinar el precio total a mostrar
+      const precioTotal = t.montoTotal ?? s?.precio ?? '';
       return (
         <div key={t.id} className={itemClass}>
           <div className="turno-hora">{t.hora ? t.hora : ''}</div>
@@ -155,10 +211,29 @@ const PanelTrabajo = () => {
             <h4>{s?.nombre}</h4>
             <p>{u?.nombre} / {u?.telefono}</p>
             <p className="turno-id">ID: {t.pagoId}</p>
+            <p className="turno-precio" style={{fontWeight:'bold',color:'#38b000',marginTop:'2px'}}>Total: ${precioTotal}</p>
           </div>
           <div style={{display:'flex',gap:'8px'}}>
             {(tipo === 'hoy' || tipo === 'manana') && (
-              <button className="btn-accion completar" onClick={()=>marcarCompletado(t)} title="Completar">
+              <button
+                className="btn-accion completar"
+                onClick={async () => {
+                  const result = await Swal.fire({
+                    title: '¿Seguro que quieres completar el turno?',
+                    text: 'Esta acción marcará el turno como completado.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#38b000',
+                    cancelButtonColor: '#d13fa0',
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Cancelar',
+                  });
+                  if (result.isConfirmed) {
+                    marcarCompletado(t);
+                  }
+                }}
+                title="Completar"
+              >
                 <CheckCircle size={20} />
               </button>
             )}
