@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import path from 'path';
 import "dotenv/config";
 import './src/database/dbConnection.js';
+import mongoose from 'mongoose';
 
 
 import productosRoutes from './src/routes/productos.routes.js';
@@ -25,6 +26,26 @@ app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Health check para verificar deployment + conexión a DB
+app.get('/api/health', (req, res) => {
+  const states = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  };
+  const readyState = mongoose?.connection?.readyState;
+  res.json({
+    ok: true,
+    now: new Date().toISOString(),
+    mongo: {
+      readyState,
+      status: states[readyState] || 'unknown',
+      name: mongoose?.connection?.name,
+    },
+  });
+});
 
 
 app.use('/api/productos', productosRoutes);

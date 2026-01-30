@@ -27,8 +27,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const userData = await usuariosAPI.login(email, password);
-      if (userData && userData.usuario) {
-        const userWithToken = { ...userData.usuario, token: 'mock-token-' + Date.now() };
+      if (userData && userData.usuario && userData.token) {
+        const userWithToken = { ...userData.usuario, token: userData.token };
         localStorage.setItem('user', JSON.stringify(userWithToken));
         setUser(userWithToken);
         toast.success('¡Bienvenido/a!');
@@ -46,28 +46,32 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const users = await usuariosAPI.getAll();
-      const emailExists = users.data.find((u) => u.email === userData.email);
-      
-      if (emailExists) {
-        toast.error('El email ya está registrado');
+      const response = await usuariosAPI.create({
+        ...userData,
+        rol: 'cliente',
+      });
+
+      // Backend recomendado: { token, usuario }
+      const payload = response?.data;
+      const usuario = payload?.usuario || payload;
+      const token = payload?.token;
+      if (!usuario || !token) {
+        toast.error('Registro incompleto: falta token del servidor');
         return false;
       }
 
-      const newUser = {
-        ...userData,
-        rol: 'cliente',
-        id: Date.now(),
-      };
-
-      const response = await usuariosAPI.create(newUser);
-      // Usar _id real de MongoDB si existe
-      const userWithToken = { ...response.data, _id: response.data._id || response.data.id, token: 'mock-token-' + Date.now() };
+      const userWithToken = { ...usuario, token };
       localStorage.setItem('user', JSON.stringify(userWithToken));
       setUser(userWithToken);
       toast.success('¡Registro exitoso!');
       return true;
     } catch (error) {
+      const status = error?.response?.status;
+      const msg = error?.response?.data?.mensaje;
+      if (status === 400 || status === 409) {
+        toast.error(msg || 'El email ya está registrado');
+        return false;
+      }
       toast.error('Error al registrarse');
       return false;
     }

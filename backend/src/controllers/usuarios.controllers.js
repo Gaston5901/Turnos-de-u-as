@@ -3,6 +3,15 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendPasswordRecoveryEmail } from "../helpers/emailSender.cjs";
 
+const sanitizeUsuario = (usuarioDoc) => {
+  if (!usuarioDoc) return usuarioDoc;
+  const obj = typeof usuarioDoc.toObject === "function" ? usuarioDoc.toObject() : { ...usuarioDoc };
+  delete obj.password;
+  delete obj.passwordResetTokenHash;
+  delete obj.passwordResetExpires;
+  return obj;
+};
+
 export const obtenerUsuarios = async (req, res) => {
   try {
     const usuarios = await UsuariosModel.find();
@@ -40,7 +49,14 @@ export const crearUsuario = async (req, res) => {
       rol,
     });
     await nuevoUsuario.save();
-    res.status(201).json(nuevoUsuario);
+
+    const token = jwt.sign(
+      { id: nuevoUsuario._id, rol: nuevoUsuario.rol },
+      process.env.JWT_SECRET || "secreto",
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({ token, usuario: sanitizeUsuario(nuevoUsuario) });
   } catch (error) {
     console.error(error);
     // Duplicados (email/username) -> 409
@@ -106,7 +122,7 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token, usuario });
+    res.json({ token, usuario: sanitizeUsuario(usuario) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
