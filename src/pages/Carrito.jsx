@@ -8,7 +8,6 @@ import { ShoppingCart, Trash2, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import './Carrito.css';
-import { API_BASE_URL } from '../config/apiBaseUrl.js';
 
 const Carrito = () => {
   const navigate = useNavigate();
@@ -57,9 +56,16 @@ const Carrito = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulación pago
 
+      const withTimeout = (promise, ms, label = 'Operación') =>
+        Promise.race([
+          promise,
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`${label} tardó demasiado (${ms}ms)`)), ms)
+          ),
+        ]);
+
       const pagoIdGlobal = 'MP' + Date.now() + Math.random().toString(36).substr(2, 9);
-      const serviciosEmail = [];
-      for (const item of items) {
+      const turnosToCreate = items.map((item) => {
         const turnoData = {
           // usuario: user.id, // NO enviar este campo
           email: user.email,
@@ -74,33 +80,14 @@ const Carrito = () => {
           montoTotal: item.servicio.precio,
           createdAt: new Date().toISOString(),
         };
-        await turnosAPI.create(turnoData);
-        serviciosEmail.push({
-          nombre: item.servicio.nombre,
-          precio: item.servicio.precio,
-          fecha: item.fecha,
-          hora: item.hora,
-        });
-      }
-      // Enviar comprobante al backend
-      try {
-        await fetch(`${API_BASE_URL}/email/comprobante`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: user.email,
-            nombre: user.nombre,
-            servicios: serviciosEmail,
-            seña: calcularSeña(),
-            total: calcularTotal(),
-            pagoId: pagoIdGlobal,
-          })
-        });
-      } catch (e) {
-        console.error('Error enviando email comprobante', e);
-      }
+        return withTimeout(turnosAPI.create(turnoData), 20000, 'Creación de turno');
+      });
 
-      toast.success('¡Turno confirmado en Delfina Nails Studio! Email enviado.');
+      // Crear todos los turnos. El backend se encarga de enviar el email de comprobante.
+      await Promise.all(turnosToCreate);
+
+      toast.success('¡Turno confirmado en Delfina Nails Studio!');
+      toast.info('Si no ves el email, revisá Spam/Promociones.', { autoClose: 6000 });
       toast.info('Dirección: Barrio San Martín mza A casa 5. Recordá llegar 5 minutos antes.', { autoClose: 7000 });
       vaciarCarrito();
       navigate('/mis-turnos');
