@@ -86,7 +86,7 @@ const Carrito = () => {
         };
 
         try {
-          await withTimeout(turnosAPI.create(turnoData), 20000, 'Creación de turno');
+          await withTimeout(turnosAPI.create(turnoData), 45000, 'Creación de turno');
           confirmadosIds.push(item.id);
         } catch (err) {
           const status = err?.response?.status;

@@ -163,6 +163,13 @@ export const crearTurno = async (req, res) => {
       email: usuarioDoc.email || emailNorm || '',
     });
     await turno.save();
+
+    // Responder al frontend lo antes posible (evita timeouts por envío de email lento)
+    const resp = turno.toObject();
+    resp.id = resp._id;
+    delete resp._id;
+    res.status(201).json(resp);
+
     // Obtener datos para el email
     const servicioDoc = await ServiciosModel.findById(turno.servicio);
     const serviciosArr = [{
@@ -189,27 +196,35 @@ export const crearTurno = async (req, res) => {
     } else {
       fechaParaComprobante = String(turno.fecha);
     }
-    try {
-      await enviarComprobanteTurno({
-        to: usuarioDoc.email,
-        nombre: usuarioDoc.nombre || '',
-        servicios: serviciosArr,
-        seña: turno.montoPagado || 0,
-        total: turno.montoTotal || servicioDoc?.precio || 0,
-        pagoId: turno.pagoId || turno._id,
-        fecha: fechaParaComprobante,
-        hora: turno.hora || '',
-        restoAPagar: (turno.montoTotal || servicioDoc?.precio || 0) - (turno.montoPagado || 0),
-        extras,
-      });
-    } catch (mailError) {
-      console.error('Error enviando comprobante de turno (no bloquea la reserva):', mailError);
-    }
-    // Formatear respuesta para frontend
-    const resp = turno.toObject();
-    resp.id = resp._id;
-    delete resp._id;
-    res.status(201).json(resp);
+
+    // Enviar email en background para no bloquear la respuesta
+    const withTimeout = (promise, ms) =>
+      Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(`sendMail timeout ${ms}ms`)), ms)),
+      ]);
+
+    setImmediate(async () => {
+      try {
+        await withTimeout(
+          enviarComprobanteTurno({
+            to: usuarioDoc.email,
+            nombre: usuarioDoc.nombre || '',
+            servicios: serviciosArr,
+            seña: turno.montoPagado || 0,
+            total: turno.montoTotal || servicioDoc?.precio || 0,
+            pagoId: turno.pagoId || turno._id,
+            fecha: fechaParaComprobante,
+            hora: turno.hora || '',
+            restoAPagar: (turno.montoTotal || servicioDoc?.precio || 0) - (turno.montoPagado || 0),
+            extras,
+          }),
+          15000
+        );
+      } catch (mailError) {
+        console.error('Error enviando comprobante de turno (no bloquea la reserva):', mailError);
+      }
+    });
   } catch (error) {
     res.status(400).json({ mensaje: error.message });
   }
