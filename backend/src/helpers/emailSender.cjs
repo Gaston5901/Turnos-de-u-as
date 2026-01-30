@@ -1,34 +1,73 @@
 require("dotenv/config");
 
-const nodemailer = require("nodemailer");
 const comprobanteTurnoTemplate = require("../emailTemplates/comprobanteTurno");
 const recuperarPasswordTemplate = require("../emailTemplates/recuperarPassword");
 
-const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
-const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
-const SMTP_SECURE = String(process.env.SMTP_SECURE || "false").toLowerCase() === "true";
+const hasResend = Boolean(process.env.RESEND_API_KEY);
 
-const transporter = nodemailer.createTransport({
-  // Si en Render definís SMTP_HOST/SMTP_PORT/SMTP_SECURE, lo toma.
-  // Si no, usa Gmail por SMTP estándar.
-  host: SMTP_HOST,
-  port: SMTP_PORT,
-  secure: SMTP_SECURE, // true para 465, false para 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  // Evita cuelgues silenciosos
-  connectionTimeout: 20000,
-  greetingTimeout: 20000,
-  socketTimeout: 30000,
-});
+let resendClient = null;
+if (hasResend) {
+  try {
+    // eslint-disable-next-line global-require
+    const { Resend } = require("resend");
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+    console.log("Email provider: Resend");
+  } catch (e) {
+    console.error("No se pudo inicializar Resend:", e?.message || e);
+  }
+}
 
-// Log de diagnóstico (útil en Render Logs)
-transporter
-  .verify()
-  .then(() => console.log("SMTP listo"))
-  .catch((e) => console.error("Error SMTP verify:", e?.message || e));
+let transporter = null;
+if (!resendClient) {
+  // Fallback SMTP (puede fallar en Render por bloqueo de puertos)
+  // eslint-disable-next-line global-require
+  const nodemailer = require("nodemailer");
+  const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
+  const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+  const SMTP_SECURE = String(process.env.SMTP_SECURE || "false").toLowerCase() === "true";
+  transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE, // true para 465, false para 587
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 30000,
+  });
+
+  transporter
+    .verify()
+    .then(() => console.log("SMTP listo"))
+    .catch((e) => console.error("Error SMTP verify:", e?.message || e));
+}
+
+const defaultFrom = process.env.EMAIL_FROM || "Delfina Nails Studio <onboarding@resend.dev>";
+
+async function sendEmail({ to, subject, html }) {
+  if (resendClient) {
+    await resendClient.emails.send({
+      from: defaultFrom,
+      to,
+      subject,
+      html,
+    });
+    return;
+  }
+
+  if (!transporter) {
+    throw new Error("No hay proveedor de email configurado (RESEND_API_KEY o SMTP)");
+  }
+
+  await transporter.sendMail({
+    from: defaultFrom,
+    to,
+    subject,
+    html,
+  });
+}
 
 async function enviarComprobanteTurno({
   to,
@@ -42,8 +81,7 @@ async function enviarComprobanteTurno({
   extras,
   restoAPagar,
 }) {
-  const mailOptions = {
-    from: process.env.EMAIL_FROM || `Delfina Nails Studio <${process.env.EMAIL_USER}>`,
+  await sendEmail({
     to,
     subject: "¡Tu turno fue reservado con éxito!",
     html: comprobanteTurnoTemplate({
@@ -57,23 +95,18 @@ async function enviarComprobanteTurno({
       extras,
       restoAPagar,
     }),
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 }
 
 async function sendPasswordRecoveryEmail(to, token) {
   const minutos = 10;
   const frontend = process.env.FRONTEND_URL || "http://localhost:5173";
   const resetUrl = `${frontend}/recuperar?token=${token}`;
-  const mailOptions = {
-    from: process.env.EMAIL_FROM || `"Delfina Nails Studio" <${process.env.EMAIL_USER}>`,
+  await sendEmail({
     to,
     subject: "Recuperación de contraseña",
     html: recuperarPasswordTemplate({ resetUrl, minutos }),
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 }
 
 module.exports = {
