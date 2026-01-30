@@ -65,9 +65,13 @@ const Carrito = () => {
         ]);
 
       const pagoIdGlobal = 'MP' + Date.now() + Math.random().toString(36).substr(2, 9);
-      const turnosToCreate = items.map((item) => {
+
+      const confirmadosIds = [];
+      const fallidos = [];
+
+      // Crear turnos uno por uno para poder dejar en el carrito solo los que fallaron.
+      for (const item of items) {
         const turnoData = {
-          // usuario: user.id, // NO enviar este campo
           email: user.email,
           nombre: user.nombre,
           telefono: user.telefono || '',
@@ -80,11 +84,30 @@ const Carrito = () => {
           montoTotal: item.servicio.precio,
           createdAt: new Date().toISOString(),
         };
-        return withTimeout(turnosAPI.create(turnoData), 20000, 'Creación de turno');
-      });
 
-      // Crear todos los turnos. El backend se encarga de enviar el email de comprobante.
-      await Promise.all(turnosToCreate);
+        try {
+          await withTimeout(turnosAPI.create(turnoData), 20000, 'Creación de turno');
+          confirmadosIds.push(item.id);
+        } catch (err) {
+          const status = err?.response?.status;
+          const mensaje = err?.response?.data?.mensaje || err?.message || 'Error desconocido';
+          fallidos.push({ item, status, mensaje });
+        }
+      }
+
+      // Sacar del carrito los turnos que ya quedaron confirmados
+      confirmadosIds.forEach((id) => eliminarDelCarrito(id));
+
+      if (fallidos.length > 0) {
+        // Mostrar el primer motivo claro (409: horario no disponible / duplicado)
+        const first = fallidos[0];
+        toast.error(first.mensaje || 'Uno o más turnos no pudieron confirmarse');
+        if (confirmadosIds.length > 0) {
+          toast.info('Se confirmaron algunos turnos. Revisá tu carrito para los que faltan.', { autoClose: 7000 });
+          navigate('/mis-turnos');
+        }
+        return;
+      }
 
       toast.success('¡Turno confirmado en Delfina Nails Studio!');
       toast.info('Si no ves el email, revisá Spam/Promociones.', { autoClose: 6000 });

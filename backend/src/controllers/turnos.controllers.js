@@ -139,7 +139,20 @@ export const crearTurno = async (req, res) => {
     });
     console.log('CREAR TURNO: solapado encontrado:', !!solapado, solapado ? { id: solapado._id, fecha: solapado.fecha, hora: solapado.hora, estado: solapado.estado } : null);
     if (solapado) {
-      return res.status(409).json({ mensaje: "Ya tienes un turno reservado para ese horario." });
+      // Idempotencia: si el turno ya existe para ese usuario/servicio/fecha/hora, devolvemos el existente.
+      // Esto evita que el checkout falle en reintentos y previene duplicados.
+      const objExist = solapado.toObject();
+      objExist.id = objExist._id;
+      delete objExist._id;
+      objExist.servicioId = objExist.servicio?._id || objExist.servicio;
+      objExist.usuarioId = objExist.usuario?._id || objExist.usuario;
+      const fechaObjExist = new Date(objExist.fecha);
+      objExist.fecha = fechaObjExist.toISOString().slice(0,10);
+      objExist.hora = objExist.hora || '';
+      objExist.montoPagado = objExist.montoPagado || 0;
+      objExist.pagoId = objExist.pagoId || objExist.id;
+      console.log('CREAR TURNO: ya existía (solapado), devolviendo existente:', objExist.id);
+      return res.status(200).json(objExist);
     }
     // Crear el turno asociado al usuario correcto
     const turno = new TurnosModel({
