@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { LogIn, Mail, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { API_BASE_URL } from '../config/apiBaseUrl.js';
 
 
 const RecuperarPassword = () => {
@@ -30,7 +31,7 @@ const RecuperarPassword = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/usuarios/recuperar-password', {
+      const res = await fetch(`${API_BASE_URL}/usuarios/recuperar-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email })
@@ -47,7 +48,7 @@ const RecuperarPassword = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/usuarios/resetear-password', {
+      const res = await fetch(`${API_BASE_URL}/usuarios/resetear-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, token, password: newPassword })

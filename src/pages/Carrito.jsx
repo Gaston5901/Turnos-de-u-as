@@ -8,6 +8,7 @@ import { ShoppingCart, Trash2, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import './Carrito.css';
+import { API_BASE_URL } from '../config/apiBaseUrl.js';
 
 const Carrito = () => {
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ const Carrito = () => {
       }
       // Enviar comprobante al backend
       try {
-        await fetch('http://localhost:4000/api/email/comprobante', {
+        await fetch(`${API_BASE_URL}/email/comprobante`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

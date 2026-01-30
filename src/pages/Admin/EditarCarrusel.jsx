@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import './EditarCarrusel.css';
 
+import { API_BASE_URL } from '../../config/apiBaseUrl.js';
+
 
 
 // API real usando backend Express
-const API_URL = 'http://localhost:4000/api/carrusel';
+const API_URL = `${API_BASE_URL}/carrusel`;
 
 const api = {
   getImages: async () => {
