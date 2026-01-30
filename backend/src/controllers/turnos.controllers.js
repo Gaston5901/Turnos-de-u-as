@@ -219,7 +219,7 @@ export const crearTurno = async (req, res) => {
             restoAPagar: (turno.montoTotal || servicioDoc?.precio || 0) - (turno.montoPagado || 0),
             extras,
           }),
-          15000
+          60000
         );
       } catch (mailError) {
         console.error('Error enviando comprobante de turno (no bloquea la reserva):', mailError);
