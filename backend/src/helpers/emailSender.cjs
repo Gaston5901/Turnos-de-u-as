@@ -3,10 +3,13 @@ require("dotenv/config");
 const comprobanteTurnoTemplate = require("../emailTemplates/comprobanteTurno");
 const recuperarPasswordTemplate = require("../emailTemplates/recuperarPassword");
 
+const provider = String(process.env.EMAIL_PROVIDER || "auto").toLowerCase();
+
 const hasResend = Boolean(process.env.RESEND_API_KEY);
+const hasSmtp = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
 let resendClient = null;
-if (hasResend) {
+if (provider === "resend" || (provider === "auto" && hasResend && !hasSmtp)) {
   try {
     // eslint-disable-next-line global-require
     const { Resend } = require("resend");
@@ -18,7 +21,7 @@ if (hasResend) {
 }
 
 let transporter = null;
-if (!resendClient) {
+if (provider === "smtp" || provider === "auto") {
   // Fallback SMTP (puede fallar en Render por bloqueo de puertos)
   // eslint-disable-next-line global-require
   const nodemailer = require("nodemailer");
@@ -46,24 +49,44 @@ if (!resendClient) {
 
 const defaultFrom = process.env.EMAIL_FROM || "Delfina Nails Studio <onboarding@resend.dev>";
 
+function normalizeTo(to) {
+  if (Array.isArray(to)) {
+    return to.map((t) => String(t || "").trim()).filter(Boolean);
+  }
+  return String(to || "").trim();
+}
+
 async function sendEmail({ to, subject, html }) {
-  if (resendClient) {
-    await resendClient.emails.send({
-      from: defaultFrom,
-      to,
-      subject,
-      html,
-    });
-    return;
+  const toNorm = normalizeTo(to);
+  if (!toNorm || (Array.isArray(toNorm) && toNorm.length === 0)) {
+    throw new Error("Destinatario (to) vacío");
   }
 
+  // 1) Intentar Resend si está configurado
+  if (resendClient) {
+    try {
+      await resendClient.emails.send({
+        from: defaultFrom,
+        to: toNorm,
+        subject,
+        html,
+      });
+      return;
+    } catch (e) {
+      // En plan 'auto', fall back a SMTP si existe.
+      if (provider !== "auto" || !transporter) throw e;
+      console.error("Resend falló, intentando SMTP:", e?.message || e);
+    }
+  }
+
+  // 2) SMTP
   if (!transporter) {
-    throw new Error("No hay proveedor de email configurado (RESEND_API_KEY o SMTP)");
+    throw new Error("No hay proveedor de email configurado (SMTP o Resend)");
   }
 
   await transporter.sendMail({
     from: defaultFrom,
-    to,
+    to: toNorm,
     subject,
     html,
   });

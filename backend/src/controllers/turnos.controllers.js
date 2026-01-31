@@ -181,7 +181,7 @@ export const crearTurno = async (req, res) => {
     const passwordParaEmail = req.body.passwordGenerada || passwordGenerada;
     if (passwordParaEmail) {
       extras = {
-        usuario: email,
+        usuario: usuarioDoc?.email || emailNorm || email,
         password: passwordParaEmail
       };
     }
