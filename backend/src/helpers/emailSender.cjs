@@ -1,5 +1,7 @@
 require("dotenv/config");
 
+const https = require("https");
+
 const comprobanteTurnoTemplate = require("../emailTemplates/comprobanteTurno");
 const recuperarPasswordTemplate = require("../emailTemplates/recuperarPassword");
 
@@ -7,9 +9,21 @@ const provider = String(process.env.EMAIL_PROVIDER || "auto").toLowerCase();
 
 const hasResend = Boolean(process.env.RESEND_API_KEY);
 const hasSmtp = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+const hasBrevo = Boolean(process.env.BREVO_API_KEY);
+
+function parseFrom(fromValue) {
+  const raw = String(fromValue || "").trim();
+  const match = raw.match(/^\s*(.*?)\s*<\s*([^>]+)\s*>\s*$/);
+  if (match) {
+    const name = match[1]?.trim();
+    const email = match[2]?.trim();
+    return { name: name || undefined, email };
+  }
+  return { name: undefined, email: raw };
+}
 
 let resendClient = null;
-if (provider === "resend" || (provider === "auto" && hasResend && !hasSmtp)) {
+if (provider === "resend" || (provider === "auto" && hasResend)) {
   try {
     // eslint-disable-next-line global-require
     const { Resend } = require("resend");
@@ -21,7 +35,7 @@ if (provider === "resend" || (provider === "auto" && hasResend && !hasSmtp)) {
 }
 
 let transporter = null;
-if (provider === "smtp" || provider === "auto") {
+if (provider === "smtp" || (provider === "auto" && hasSmtp)) {
   // Fallback SMTP (puede fallar en Render por bloqueo de puertos)
   // eslint-disable-next-line global-require
   const nodemailer = require("nodemailer");
@@ -56,10 +70,92 @@ function normalizeTo(to) {
   return String(to || "").trim();
 }
 
+function httpPostJson({ url, headers, body, timeoutMs = 20000 }) {
+  return new Promise((resolve, reject) => {
+    const requestUrl = new URL(url);
+    const data = JSON.stringify(body);
+
+    const req = https.request(
+      {
+        method: "POST",
+        hostname: requestUrl.hostname,
+        path: requestUrl.pathname + requestUrl.search,
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(data),
+          ...headers,
+        },
+      },
+      (res) => {
+        let raw = "";
+        res.on("data", (chunk) => {
+          raw += chunk;
+        });
+        res.on("end", () => {
+          const ok = res.statusCode >= 200 && res.statusCode < 300;
+          if (ok) return resolve({ status: res.statusCode, body: raw });
+          const msg = raw || res.statusMessage || "HTTP error";
+          return reject(new Error(`HTTP ${res.statusCode}: ${msg}`));
+        });
+      }
+    );
+
+    req.on("error", reject);
+    req.setTimeout(timeoutMs, () => {
+      req.destroy(new Error(`HTTP timeout ${timeoutMs}ms`));
+    });
+
+    req.write(data);
+    req.end();
+  });
+}
+
+async function sendEmailViaBrevo({ to, subject, html }) {
+  if (!process.env.BREVO_API_KEY) {
+    throw new Error("Falta BREVO_API_KEY");
+  }
+
+  const fromParsed = parseFrom(defaultFrom);
+  if (!fromParsed.email) {
+    throw new Error("EMAIL_FROM inválido");
+  }
+
+  const toArray = Array.isArray(to) ? to : [to];
+  const payload = {
+    sender: {
+      email: fromParsed.email,
+      ...(fromParsed.name ? { name: fromParsed.name } : {}),
+    },
+    to: toArray.map((email) => ({ email })),
+    subject,
+    htmlContent: html,
+  };
+
+  await httpPostJson({
+    url: "https://api.brevo.com/v3/smtp/email",
+    headers: {
+      "api-key": process.env.BREVO_API_KEY,
+      Accept: "application/json",
+    },
+    body: payload,
+    timeoutMs: 20000,
+  });
+}
+
 async function sendEmail({ to, subject, html }) {
   const toNorm = normalizeTo(to);
   if (!toNorm || (Array.isArray(toNorm) && toNorm.length === 0)) {
     throw new Error("Destinatario (to) vacío");
+  }
+
+  // 0) Brevo (HTTP API) — ideal para Render porque no usa SMTP
+  if (provider === "brevo" || (provider === "auto" && hasBrevo)) {
+    await sendEmailViaBrevo({
+      to: toNorm,
+      subject,
+      html,
+    });
+    return;
   }
 
   // 1) Intentar Resend si está configurado
