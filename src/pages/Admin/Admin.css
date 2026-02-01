@@ -185,6 +185,78 @@
   font-family: monospace;
 }
 
+@media (max-width: 600px) {
+  .admin-sections {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .admin-section {
+    padding: 16px;
+  }
+
+  .admin-section h2 {
+    font-size: 18px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+  }
+
+  .turno-hoy-item,
+  .turno-expirado-item,
+  .turno-cancelado-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .turno-hora {
+    font-size: 18px;
+    min-width: auto;
+  }
+
+  .turno-detalles h4 {
+    font-size: 16px;
+  }
+
+  .turno-detalles p {
+    font-size: 12px;
+    font-family: inherit;
+  }
+
+  .turno-id,
+  .turno-precio {
+    display: block;
+    font-size: 12px;
+  }
+
+  .turno-acciones {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btn-accion {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Solo sección de Hoy: centrar contenido en móvil */
+  .admin-section:first-child .turno-hoy-item {
+    align-items: center;
+    text-align: center;
+  }
+
+  .admin-section:first-child .turno-hoy-item .turno-hora,
+  .admin-section:first-child .turno-hoy-item .turno-detalles h4,
+  .admin-section:first-child .turno-hoy-item .turno-detalles p {
+    text-align: center;
+  }
+}
+
 .turno-estado {
   padding: 8px 16px;
   border-radius: 20px;
@@ -419,9 +491,59 @@
 /* Estadísticas */
 .periodo-selector {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   justify-content: center;
-  margin-bottom: 40px;
+  margin-bottom: 28px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+  box-shadow: 0 6px 18px rgba(209,63,160,0.12);
+}
+
+.periodo-selector .btn {
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+}
+
+.periodo-selector .btn-secondary {
+  background: #fff;
+  color: #d13fa0;
+  border: 1.5px solid #d13fa0;
+}
+
+.periodo-selector .btn-primary {
+  background: linear-gradient(90deg,#d13fa0,#ff5ec4);
+  border: none;
+}
+
+.periodo-selector .select-anio-mes,
+.periodo-selector select {
+  border-radius: 10px;
+  border: 1.5px solid #f3c6de;
+  padding: 6px 10px;
+  background: #fff;
+  color: #333;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .periodo-selector {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .periodo-selector .btn,
+  .periodo-selector .btn-secondary,
+  .periodo-selector .btn-primary,
+  .periodo-selector .select-anio-mes {
+    width: 100%;
+  }
+
+  .periodo-selector select {
+    height: 38px;
+  }
 }
 
 .stat-card-large {
@@ -685,13 +807,13 @@
 /* Usuarios Admin */
 .usuarios-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
 }
 
 .usuario-card {
   background: var(--white);
-  padding: 25px;
+  padding: 18px;
   border-radius: 16px;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -718,6 +840,7 @@
 
 .usuario-info {
   flex: 1;
+  min-width: 0;
 }
 
 .usuario-info h3 {
@@ -730,11 +853,97 @@
   color: var(--text-light);
   font-size: 13px;
   margin: 4px 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .usuario-info .badge {
   margin-top: 10px;
   display: inline-block;
+}
+
+/* Historial lista */
+.historial-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historial-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #f3d1e6;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(209,63,160,0.08);
+}
+
+.historial-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.historial-titulo {
+  font-weight: 700;
+  color: #d13fa0;
+  font-size: 16px;
+}
+
+.historial-linea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.historial-cliente {
+  color: #333;
+  font-weight: 500;
+}
+
+.historial-estado {
+  font-size: 12px;
+  font-weight: 600;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2px 10px;
+  border: 1px solid transparent;
+}
+
+.historial-fecha {
+  font-size: 12px;
+  color: #888;
+}
+
+.historial-ver {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f5f5f5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #d13fa022;
+}
+
+.historial-paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.historial-pagina {
+  font-weight: 600;
+  color: #555;
 }
 
 @media (max-width: 968px) {
@@ -786,5 +995,24 @@
   .servicios-grid,
   .usuarios-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .usuario-card {
+    padding: 14px;
+    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .usuario-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .usuario-info h2,
+  .usuario-info h3 {
+    font-size: 16px;
   }
 }

@@ -157,6 +157,15 @@
     color: #fff;
   }
 
+  .sidebar-nav {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-logout {
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
+
   .sidebar-link svg,
   .sidebar-logout svg {
     color: #fff;

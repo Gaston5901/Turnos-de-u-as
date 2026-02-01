@@ -80,7 +80,7 @@ const UsuariosAdmin = () => {
                   {usuario.rol === 'admin' ? <Shield size={32} /> : <UserIcon size={32} />}
                 </div>
                 <div className="usuario-info">
-                  <h2 style={{fontSize:'1.25rem',marginBottom:'4px'}}>{usuario.nombre || '(Sin nombre)'}</h2>
+                  <h2 style={{fontSize:'1.25rem',marginBottom:'4px'}}>{usuario.rol === 'admin' ? 'Triny' : (usuario.nombre || '(Sin nombre)')}</h2>
                   {usuario.rol === 'admin' ? (
                     <span className="badge badge-admin" style={{ background: 'gold', color: '#333', fontWeight: 'bold', padding: '6px 16px', borderRadius: '16px', fontSize: '1rem', marginTop: '8px', display: 'inline-block', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                       <span role="img" aria-label="corona" style={{fontSize:'1.3em',marginRight:'4px'}}>👑</span>Admin

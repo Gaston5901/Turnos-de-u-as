@@ -105,6 +105,7 @@ const Carrito = () => {
         if (confirmadosIds.length > 0) {
           toast.info('Se confirmaron algunos turnos. Revisá tu carrito para los que faltan.', { autoClose: 7000 });
           navigate('/mis-turnos');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         return;
       }
@@ -114,6 +115,7 @@ const Carrito = () => {
       toast.info('Dirección: Barrio San Martín mza A casa 5. Recordá llegar 5 minutos antes.', { autoClose: 7000 });
       vaciarCarrito();
       navigate('/mis-turnos');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Error al procesar el pago:', error);
       toast.error('Error al procesar el pago. Intenta nuevamente.');

@@ -106,16 +106,18 @@ const PanelTrabajo = () => {
     return lista.length ? lista.map(t => {
       const s = servicios[t.servicioId];
       const u = usuarios[t.usuarioId];
+      const nombreUsuario = u?.nombre || t.nombre || 'Sin nombre';
+      const telefonoUsuario = u?.telefono || t.telefono || '';
       const precioTotal = t.montoTotal ?? s?.precio ?? '';
       return (
-        <div key={t.id} className="turno-cancelado-item" style={{background:'#fff3f3',border:'1.5px solid #e57373',borderRadius:'12px',padding:'12px 18px',marginBottom:'10px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div key={t.id} className="turno-cancelado-item" style={{background:'#fff3f3',border:'1.5px solid #e57373',borderRadius:'12px',padding:'12px 18px',marginBottom:'10px'}}>
           <div>
             <div style={{fontWeight:'bold',color:'#e53935'}}>{t.hora} - {s?.nombre}</div>
-            <div style={{fontSize:'1rem',color:'#ad1457'}}>{u?.nombre} / {u?.telefono}</div>
+            <div style={{fontSize:'1rem',color:'#ad1457'}}>{nombreUsuario}{telefonoUsuario ? ` / ${telefonoUsuario}` : ''}</div>
             <div className="turno-id" style={{fontSize:'0.9em',color:'#888'}}>ID: {t.pagoId}</div>
             <div className="turno-precio" style={{fontWeight:'bold',color:'#38b000',marginTop:'2px'}}>Total: ${precioTotal}</div>
           </div>
-          <div style={{display:'flex',gap:'8px'}}>
+          <div className="turno-acciones" style={{display:'flex',gap:'8px'}}>
             <button
               className="btn-accion completar"
               onClick={async () => {
@@ -201,6 +203,8 @@ const PanelTrabajo = () => {
     lista.length ? lista.map(t => {
       const s = servicios[t.servicioId];
       const u = usuarios[t.usuarioId];
+      const nombreUsuario = u?.nombre || t.nombre || 'Sin nombre';
+      const telefonoUsuario = u?.telefono || t.telefono || '';
       const itemClass = tipo === 'expirados' ? 'turno-expirado-item' : 'turno-hoy-item';
       // Determinar el precio total a mostrar
       const precioTotal = t.montoTotal ?? s?.precio ?? '';
@@ -209,11 +213,11 @@ const PanelTrabajo = () => {
           <div className="turno-hora">{t.hora ? t.hora : ''}</div>
           <div className="turno-detalles">
             <h4>{s?.nombre}</h4>
-            <p>{u?.nombre} / {u?.telefono}</p>
+            <p>{nombreUsuario}{telefonoUsuario ? ` / ${telefonoUsuario}` : ''}</p>
             <p className="turno-id">ID: {t.pagoId}</p>
             <p className="turno-precio" style={{fontWeight:'bold',color:'#38b000',marginTop:'2px'}}>Total: ${precioTotal}</p>
           </div>
-          <div style={{display:'flex',gap:'8px'}}>
+          <div className="turno-acciones" style={{display:'flex',gap:'8px'}}>
             {(tipo === 'hoy' || tipo === 'manana') && (
               <button
                 className="btn-accion completar"

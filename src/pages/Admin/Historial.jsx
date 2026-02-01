@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { turnosAPI, serviciosAPI, usuariosAPI } from '../../services/api';
-import { History, Search } from 'lucide-react';
+import { History, Search, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import './Admin.css';
 
@@ -138,17 +138,20 @@ function ModalTurnoDetalle({ turno, usuario, servicio, onClose }) {
           ×
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
           <span style={{ fontSize: 34 }}>📋</span>
           <h2 style={{ margin: 0, color: '#d13fa0' }}>{servicio?.nombre}</h2>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+          <span style={{ fontSize:13, fontWeight:600, color: estadoColor, background:'#fff', borderRadius:12, padding:'4px 14px', display:'inline-block', border:`1px solid ${estadoColor}33`}}>
+            {estadoLabel}
+          </span>
         </div>
 
         <div style={{ fontSize: 16, lineHeight: 1.9, color: '#333' }}>
           <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:2}}>
             <b>Cliente:</b> {usuario?.nombre} <span style={{ color: '#888' }}>({usuario?.telefono})</span>
-            <span style={{ fontSize:13, fontWeight:600, color: estadoColor, background:'#fff', borderRadius:12, padding:'2px 12px', display:'inline-block', border:`1px solid ${estadoColor}33`}}>
-              {estadoLabel}
-            </span>
           </div>
           <div><b>Fecha:</b> {format(new Date(turno.fecha + 'T00:00:00'), 'dd/MM/yyyy')} · <b>Hora:</b> {turno.hora} hs</div>
 
@@ -186,6 +189,8 @@ const Historial = () => {
   const [busqueda, setBusqueda] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [modalTurnoId, setModalTurnoId] = useState(null);
+  const [pagina, setPagina] = useState(1);
+  const itemsPorPagina = 8;
 
   useEffect(() => {
     cargarDatos();
@@ -221,10 +226,20 @@ const Historial = () => {
     const buscaOk =
       !b ||
       servicios[t.servicioId]?.nombre.toLowerCase().includes(b) ||
-      usuarios[t.usuarioId]?.nombre.toLowerCase().includes(b) ||
+      (usuarios[t.usuarioId]?.nombre || t.nombre || '').toLowerCase().includes(b) ||
       t.pagoId.toLowerCase().includes(b);
     return estadoOk && buscaOk;
   });
+
+  useEffect(() => {
+    setPagina(1);
+  }, [busqueda, filtroEstado]);
+
+  const totalPaginas = Math.max(1, Math.ceil(turnosFiltrados.length / itemsPorPagina));
+  const turnosPaginados = turnosFiltrados.slice(
+    (pagina - 1) * itemsPorPagina,
+    pagina * itemsPorPagina
+  );
 
   if (loading) {
     return <p style={{ padding: 100, textAlign: 'center' }}>Cargando historial...</p>;
@@ -261,9 +276,11 @@ const Historial = () => {
           </div>
         </div>
 
-        {turnosFiltrados.map(turno => {
+        <div className="historial-lista">
+        {turnosPaginados.map(turno => {
           const servicio = servicios[turno.servicioId];
           const usuario = usuarios[turno.usuarioId];
+          const nombreUsuario = usuario?.nombre || turno.nombre || 'Sin nombre';
           // Badge simple para estado principal
           let estadoLabel = turno.estado;
           let estadoColor = '#1e7e34';
@@ -311,56 +328,46 @@ const Historial = () => {
             estadoColor = '#1976d2';
           }
           return (
-            <div
-              key={turno.id}
-              className="turno-admin-card compacto"
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '18px 24px',
-                marginBottom: 16,
-                borderRadius: 20,
-                background: 'linear-gradient(180deg,#fff,#fce4ec)',
-                border: '1.5px solid #f3d1e6',
-                boxShadow: '0 8px 22px rgba(209,63,160,0.10)',
-                position: 'relative',
-                transition: 'box-shadow 0.2s',
-              }}
-            >
-              <div style={{display:'flex',flexDirection:'column',gap:2}}>
-                <b style={{ color: '#d13fa0', fontSize:18 }}>{servicio?.nombre}</b>
-                <div style={{display:'flex',alignItems:'center',gap:8}}>
-                  <span style={{ color: '#333', fontWeight: 500 }}>{usuario?.nombre}</span>
-                  <span style={{ fontSize:13, fontWeight:600, color: estadoColor, background:'#fff', borderRadius:12, padding:'2px 12px', display:'inline-block', border:`1px solid ${estadoColor}33`}}>
+            <div key={turno.id} className="historial-item">
+              <div className="historial-info">
+                <div className="historial-titulo">{servicio?.nombre}</div>
+                <div className="historial-linea">
+                  <span className="historial-cliente">{nombreUsuario}</span>
+                  <span className="historial-estado" style={{ color: estadoColor, borderColor: `${estadoColor}33` }}>
                     {estadoLabel}
                   </span>
                 </div>
-                <small style={{ color: '#888' }}>
+                <div className="historial-fecha">
                   {format(new Date(turno.fecha+'T00:00:00'),'dd/MM/yyyy')} · {turno.hora} hs
-                </small>
+                </div>
               </div>
-
-              <button
-                onClick={() => setModalTurnoId(turno.id)}
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: '#f5f5f5',
-                  fontSize: 20,
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px #d13fa022',
-                  transition: 'background 0.2s',
-                }}
-                title="Ver detalles"
-              >
-                ⋮
+              <button className="historial-ver" onClick={() => setModalTurnoId(turno.id)} title="Ver detalles">
+                <Eye size={18} />
               </button>
             </div>
           );
         })}
+        </div>
+
+        {turnosFiltrados.length > itemsPorPagina && (
+          <div className="historial-paginacion">
+            <button
+              className="btn btn-secondary"
+              onClick={() => setPagina(p => Math.max(1, p - 1))}
+              disabled={pagina === 1}
+            >
+              Anterior
+            </button>
+            <span className="historial-pagina">Página {pagina} de {totalPaginas}</span>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+              disabled={pagina === totalPaginas}
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
 
         {/* ModalTurnoDetalle fuera del map, estable y sin parpadeo */}
         {modalTurnoId && (() => {
@@ -368,10 +375,15 @@ const Historial = () => {
           if (!turnoSel) return null;
           const servicioSel = servicios[turnoSel.servicioId];
           const usuarioSel = usuarios[turnoSel.usuarioId];
+          const usuarioModal = {
+            ...usuarioSel,
+            nombre: usuarioSel?.nombre || turnoSel.nombre || 'Sin nombre',
+            telefono: usuarioSel?.telefono || turnoSel.telefono || '',
+          };
           return (
             <ModalTurnoDetalle
               turno={turnoSel}
-              usuario={usuarioSel}
+              usuario={usuarioModal}
               servicio={servicioSel}
               onClose={() => setModalTurnoId(null)}
             />

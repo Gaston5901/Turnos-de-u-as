@@ -48,7 +48,7 @@ const Register = () => {
     const { confirmPassword, ...userData } = formData;
     const success = await register(userData);
     if (success) {
-      navigate('/');
+      navigate('/mis-turnos');
     }
   };
 

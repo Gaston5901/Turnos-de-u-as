@@ -102,44 +102,45 @@ const EditarHorariosAdmin = () => {
         </div>
       )}
       {loading && <div className="cargando-horario">Cargando...</div>}
-      <table>
-        <thead>
-          <tr>
-            <th>Día</th>
-            <th>Horarios</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {diasSemana.map(dia => (
-            <tr key={dia.key}>
-              <td>{dia.nombre}</td>
-              <td>
-                {editando === dia.key ? (
-                  <input
-                    value={nuevoHorario}
-                    onChange={e => setNuevoHorario(e.target.value)}
-                    placeholder="Ej: 09:00, 10:00, 11:00"
-                  />
-                ) : (
-                  (horarios[dia.key] || []).join(', ')
-                )}
-              </td>
-              <td>
-                {editando === dia.key ? (
-                  <>
-                    <button onClick={() => handleGuardar(dia.key)} disabled={loading}>Guardar</button>
-                    <button onClick={() => setEditando(null)} disabled={loading}>Cancelar</button>
-                  </>
-                ) : (
-                  <button onClick={() => handleEditar(dia.key)}>Editar</button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="horarios-lista">
+        {diasSemana.map(dia => (
+          <div key={dia.key} className="horario-item">
+            <div className="horario-info">
+              <div className="horario-dia">{dia.nombre}</div>
+              <div className="horario-valores">
+                {(horarios[dia.key] || []).join(', ') || 'Sin horarios'}
+              </div>
+            </div>
+            <button className="horario-btn" onClick={() => handleEditar(dia.key)}>
+              Editar
+            </button>
+          </div>
+        ))}
+      </div>
       <p style={{marginTop:16, fontSize:'0.95em', color:'#666'}}>Los cambios aplican para todos los lunes, martes, etc. Si modificás un día, ese horario se usará para todos los de ese tipo.</p>
+
+      {editando && (
+        <div className="horario-modal-backdrop" onClick={() => setEditando(null)}>
+          <div className="horario-modal" onClick={e => e.stopPropagation()}>
+            <button className="horario-modal-close" onClick={() => setEditando(null)}>&times;</button>
+            <h3>Editar horarios</h3>
+            <p className="horario-modal-subtitle">
+              {diasSemana.find(d => d.key === editando)?.nombre}
+            </p>
+            <label className="horario-modal-label">Horarios (separados por coma)</label>
+            <input
+              className="horario-modal-input"
+              value={nuevoHorario}
+              onChange={e => setNuevoHorario(e.target.value)}
+              placeholder="Ej: 09:00, 10:00, 11:00"
+            />
+            <div className="horario-modal-actions">
+              <button className="btn btn-secondary" onClick={() => setEditando(null)} disabled={loading}>Cancelar</button>
+              <button className="btn btn-primary" onClick={() => handleGuardar(editando)} disabled={loading}>Guardar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

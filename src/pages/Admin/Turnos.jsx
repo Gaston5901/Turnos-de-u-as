@@ -14,9 +14,9 @@ const Turnos = () => {
     const usuario = usuarios[turno.usuarioId] || {};
     setTurnoEditar({
       ...turno,
-      nombre: usuario.nombre || '',
-      telefono: usuario.telefono || '',
-      email: usuario.email || '',
+      nombre: usuario.nombre || turno.nombre || '',
+      telefono: usuario.telefono || turno.telefono || '',
+      email: usuario.email || turno.email || '',
       rol: usuario.rol || 'cliente',
     });
     setEditando(true);
@@ -246,7 +246,7 @@ const Turnos = () => {
     const cumpleBusqueda =
       busqueda === '' ||
       servicios[turno.servicioId]?.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      usuarios[turno.usuarioId]?.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      (usuarios[turno.usuarioId]?.nombre || turno.nombre || '').toLowerCase().includes(busqueda.toLowerCase()) ||
       turno.pagoId.toLowerCase().includes(busqueda.toLowerCase());
     return esValido && cumpleBusqueda;
   });
@@ -604,6 +604,7 @@ const Turnos = () => {
               {turnosFiltrados.map((turno) => {
                 const servicio = servicios[turno.servicioId];
                 const usuario = usuarios[turno.usuarioId];
+                const nombreUsuario = usuario?.nombre || turno.nombre || 'Sin nombre';
                 // Badge de estado y color
                 let estadoLabel = turno.estado;
                 let estadoColor = '#1e7e34';
@@ -634,7 +635,7 @@ const Turnos = () => {
                     <div style={{display:'flex',flexDirection:'column',gap:2}}>
                       <b style={{ color: '#d13fa0', fontSize:18 }}>{servicio?.nombre}</b>
                       <div style={{display:'flex',alignItems:'center',gap:8}}>
-                        <span style={{ color: '#333', fontWeight: 500 }}>{usuario?.nombre}</span>
+                        <span style={{ color: '#333', fontWeight: 500 }}>{nombreUsuario}</span>
                         <span style={{ fontSize:13, fontWeight:600, color: estadoColor, background:'#fff', borderRadius:12, padding:'2px 12px', display:'inline-block', border:`1px solid ${estadoColor}33`}}>
                           {estadoLabel}
                         </span>
