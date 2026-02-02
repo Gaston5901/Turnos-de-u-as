@@ -29,6 +29,8 @@ const Turnos = () => {
   // Guardar cambios de edición
   const guardarEdicionTurno = async (e) => {
     e.preventDefault();
+    if (guardandoEdicion) return;
+    setGuardandoEdicion(true);
     try {
       // Actualiza usuario si cambió
       await usuariosAPI.update(turnoEditar.usuarioId, {
@@ -53,6 +55,8 @@ const Turnos = () => {
     } catch (error) {
       toast.error('Error al editar el turno');
       console.error(error);
+    } finally {
+      setGuardandoEdicion(false);
     }
   };
 
@@ -116,6 +120,7 @@ const Turnos = () => {
   const [busqueda, setBusqueda] = useState('');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [creando, setCreando] = useState(false);
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
   const [nuevoTurno, setNuevoTurno] = useState({
     nombre: '',
     telefono: '',
@@ -596,7 +601,33 @@ const Turnos = () => {
                   </div>
                   <div className="form-actions" style={{display:'flex',gap:'12px',padding:'18px 0',borderTop:'1px solid #eee',background:'rgba(255,255,255,0.95)',justifyContent:'flex-end',position:'sticky',bottom:0,zIndex:1}}>
                     <button type="button" className="btn btn-secondary" style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'10px 22px',fontWeight:'bold',fontSize:'1rem',transition:'0.2s'}} onClick={cerrarModalEditar}>Cerrar</button>
-                    <button type="submit" className="btn btn-primary" style={{background:'linear-gradient(90deg,#d13fa0,#e7b2e6)',color:'#fff',border:'none',borderRadius:'8px',padding:'10px 22px',fontWeight:'bold',fontSize:'1rem',boxShadow:'0 2px 8px rgba(209,63,160,0.08)',transition:'0.2s'}}>Guardar Cambios</button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={guardandoEdicion}
+                      style={{
+                        background:'linear-gradient(90deg,#d13fa0,#e7b2e6)',
+                        color:'#fff',
+                        border:'none',
+                        borderRadius:'8px',
+                        padding:'10px 22px',
+                        fontWeight:'bold',
+                        fontSize:'1rem',
+                        boxShadow:'0 2px 8px rgba(209,63,160,0.08)',
+                        transition:'0.2s',
+                        opacity: guardandoEdicion ? 0.7 : 1,
+                        cursor: guardandoEdicion ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {guardandoEdicion ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{marginRight:8}}></span>
+                          Guardando...
+                        </>
+                      ) : (
+                        'Guardar Cambios'
+                      )}
+                    </button>
                   </div>
                 </form>
               )}

@@ -36,24 +36,27 @@ const PieServicios = ({ data }) => {
     ? [{ name: 'Sin datos', cantidad: 1, color: '#e0e0e0', porcentaje: 100 }]
     : data;
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <PieChart>
-        <Pie
-          data={chartData}
-          dataKey="cantidad"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={90}
-          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
-        >
-          {chartData.map((entry, idx) => (
-            <Cell key={`cell-${idx}`} fill={entry.color} />
-          ))}
-        </Pie>
-        <Tooltip content={<CustomTooltip />} />
-      </PieChart>
-    </ResponsiveContainer>
+    <div style={{ width: '100%', height: 250 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+          <Pie
+            data={chartData}
+            dataKey="cantidad"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={90}
+            label={false}
+            labelLine={false}
+          >
+            {chartData.map((entry, idx) => (
+              <Cell key={`cell-${idx}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip content={<CustomTooltip />} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 
