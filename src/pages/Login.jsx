@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
@@ -15,6 +15,15 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+
+  useEffect(() => {
+    document.body.classList.add('auth-body');
+    return () => document.body.classList.remove('auth-body');
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -143,14 +152,14 @@ const Login = () => {
             </div>
           )}
           <div className="recover-link">
-            <Link to="/recuperar">¿Olvidaste tu contraseña?</Link>
+            <Link to="/register">¿No tenés cuenta? Registrate aquí</Link>
           </div>
         </form>
 
         <div className="auth-footer">
-          <p>¿No tenés cuenta? <Link to="/register">Registrate aquí</Link></p>
+          <p>¿Olvidaste tu contraseña? <Link to="/recuperar">Recuperala aquí</Link></p>
           <p className="mt-2">
-            <small>Usuario de prueba: admin@turnos.com / admin123</small>
+            {/* <small>Usuario de prueba: admin@turnos.com / admin123</small> */}
           </p>
         </div>
       </div>

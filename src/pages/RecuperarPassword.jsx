@@ -17,6 +17,15 @@ const RecuperarPassword = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    document.body.classList.add('auth-body');
+    return () => document.body.classList.remove('auth-body');
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
+
   // Autocompletar token desde la URL si existe
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -74,7 +83,7 @@ const RecuperarPassword = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container auth-container-recover">
       <div className="auth-card">
         <div className="auth-header">
           <LogIn size={48} className="auth-icon" />

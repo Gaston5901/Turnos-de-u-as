@@ -35,6 +35,10 @@
   padding-bottom: 60px;
 }
 
+.historial-page {
+  scroll-margin-top: 90px;
+}
+
 
 .admin-header {
   background: linear-gradient(135deg, #232526 0%, #414345 100%);
@@ -56,6 +60,10 @@
   color: #ffb6d5;
   text-shadow: 0 2px 8px rgba(255,182,213,0.12);
   font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+}
+
+.admin-header .historial-title {
+  font-size: 24px;
 }
 
 

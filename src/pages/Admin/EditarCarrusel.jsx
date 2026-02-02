@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import './EditarCarrusel.css';
 
 import { API_BASE_URL } from '../../config/apiBaseUrl.js';
@@ -32,17 +33,21 @@ const EditarCarrusel = () => {
   const [nuevaUrl, setNuevaUrl] = useState('');
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     cargarImagenes();
   }, []);
 
   const cargarImagenes = async () => {
+    setCargando(true);
     try {
       const imgs = await api.getImages();
       setImagenes(imgs);
     } catch (err) {
       setImagenes([]);
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -60,6 +65,15 @@ const EditarCarrusel = () => {
   };
 
   const handleEliminar = async (idx) => {
+    const result = await Swal.fire({
+      title: '¿Seguro que querés quitar la imagen?'
+      , text: 'Esta acción no se puede deshacer.'
+      , icon: 'warning'
+      , showCancelButton: true
+      , confirmButtonText: 'Sí, borrar'
+      , cancelButtonText: 'Cancelar'
+    });
+    if (!result.isConfirmed) return;
     const nuevas = imagenes.filter((_, i) => i !== idx);
     setImagenes(nuevas);
     await api.saveImages(nuevas);
@@ -101,13 +115,19 @@ const EditarCarrusel = () => {
     <div className="editar-carrusel-admin">
       <h2>Editar Carrusel</h2>
       <div className="imagenes-carrusel-lista">
+        {cargando && (
+          <div className="carrusel-cargando">
+            <span className="carrusel-spinner" />
+            <span className="carrusel-cargando-texto">Cargando imágenes...</span>
+          </div>
+        )}
         {imagenes.map((img, idx) => (
           <div key={idx} className="img-carrusel-item">
             <img src={img} alt="carrusel" />
             <button onClick={() => handleEliminar(idx)} title="Eliminar">🗑️</button>
           </div>
         ))}
-        {imagenes.length === 0 && <p>No hay imágenes en el carrusel.</p>}
+        {!cargando && imagenes.length === 0 && <p>No hay imágenes en el carrusel.</p>}
       </div>
       <form className="form-carrusel-admin" onSubmit={handleAgregarUrl}>
         <input

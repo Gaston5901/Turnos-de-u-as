@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { turnosAPI, serviciosAPI, usuariosAPI } from '../../services/api';
 import { History, Search, Eye } from 'lucide-react';
 import { format } from 'date-fns';
@@ -191,9 +191,14 @@ const Historial = () => {
   const [modalTurnoId, setModalTurnoId] = useState(null);
   const [pagina, setPagina] = useState(1);
   const itemsPorPagina = 8;
+  const topRef = useRef(null);
 
   useEffect(() => {
     cargarDatos();
+  }, []);
+
+  useEffect(() => {
+    topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
   const cargarDatos = async () => {
@@ -235,6 +240,12 @@ const Historial = () => {
     setPagina(1);
   }, [busqueda, filtroEstado]);
 
+  useEffect(() => {
+    if (!loading) {
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [pagina, loading]);
+
   const totalPaginas = Math.max(1, Math.ceil(turnosFiltrados.length / itemsPorPagina));
   const turnosPaginados = turnosFiltrados.slice(
     (pagina - 1) * itemsPorPagina,
@@ -246,10 +257,29 @@ const Historial = () => {
   }
 
   return (
-    <div className="admin-page">
+    <div className="admin-page historial-page" ref={topRef}>
       <div className="admin-header">
-        <h1><History size={40} /> Historial de Turnos</h1>
+        <h1 className="historial-title"><History size={40} /> Historial de Turnos</h1>
         <p>Todos los turnos registrados en el sistema</p>
+        {turnosFiltrados.length > itemsPorPagina && (
+          <div
+            style={{
+              marginTop: 6,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '6px 12px',
+              borderRadius: 999,
+              background: 'rgba(209,63,160,0.08)',
+              border: '1px solid rgba(209,63,160,0.2)',
+              color: '#d13fa0',
+              fontWeight: 600,
+              fontSize: 14
+            }}
+          >
+            Página {pagina} de {totalPaginas}
+          </div>
+        )}
       </div>
 
       <div className="container">

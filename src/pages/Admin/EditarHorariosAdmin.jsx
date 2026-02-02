@@ -18,6 +18,7 @@ const EditarHorariosAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [mensajeTipo, setMensajeTipo] = useState(''); // 'error' | 'success'
+  const [errorModal, setErrorModal] = useState('');
 
   useEffect(() => {
     cargarHorarios();
@@ -41,25 +42,40 @@ const EditarHorariosAdmin = () => {
     setNuevoHorario((horarios[dia] || []).join(', '));
     setMensaje('');
     setMensajeTipo('');
+    setErrorModal('');
+  };
+
+  const validarHorarios = (valor) => {
+    if (!valor.trim()) return '';
+    const horariosArray = valor.split(',').map(h => h.trim()).filter(Boolean);
+    const horariosDuplicados = horariosArray.filter((h, i, arr) => arr.indexOf(h) !== i);
+    if (horariosDuplicados.length > 0) {
+      const unicos = [...new Set(horariosDuplicados)];
+      return `Horario repetido: ${unicos.join(', ')}. Ese horario ya está cargado.`;
+    }
+    const horariosInvalidos = horariosArray.filter(h => {
+      const partes = h.split(':');
+      if (partes.length !== 2) return true;
+      const hh = Number(partes[0]);
+      const mm = Number(partes[1]);
+      return isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59;
+    });
+    if (horariosInvalidos.length > 0) {
+      return `Horario inválido: ${horariosInvalidos.join(', ')}. Usá el formato HH:MM (ej: 08:00, 14:30)`;
+    }
+    return '';
   };
 
   const handleGuardar = async (dia) => {
     setLoading(true);
     try {
       const horariosArray = nuevoHorario.split(',').map(h => h.trim()).filter(Boolean);
-      // Validar horarios
-      const horariosInvalidos = horariosArray.filter(h => {
-        const partes = h.split(':');
-        if (partes.length !== 2) return true;
-        const hh = Number(partes[0]);
-        const mm = Number(partes[1]);
-        return isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59;
-      });
-      if (horariosInvalidos.length > 0) {
-        setMensaje(`Horario inválido: ${horariosInvalidos.join(', ')}. Usá el formato HH:MM (ej: 08:00, 14:30)`);
-        setMensajeTipo('error');
+      const error = validarHorarios(nuevoHorario);
+      if (error) {
+        setErrorModal(error);
+        setMensaje('');
+        setMensajeTipo('');
         setLoading(false);
-        setTimeout(() => { setMensaje(''); setMensajeTipo(''); }, 3500);
         return;
       }
 
@@ -131,12 +147,21 @@ const EditarHorariosAdmin = () => {
             <input
               className="horario-modal-input"
               value={nuevoHorario}
-              onChange={e => setNuevoHorario(e.target.value)}
+              onChange={e => {
+                const valor = e.target.value;
+                setNuevoHorario(valor);
+                setErrorModal(validarHorarios(valor));
+              }}
               placeholder="Ej: 09:00, 10:00, 11:00"
             />
+            {errorModal && (
+              <div className="mensaje-horario mensaje-horario-error" style={{ marginTop: 8 }}>
+                {errorModal}
+              </div>
+            )}
             <div className="horario-modal-actions">
               <button className="btn btn-secondary" onClick={() => setEditando(null)} disabled={loading}>Cancelar</button>
-              <button className="btn btn-primary" onClick={() => handleGuardar(editando)} disabled={loading}>Guardar</button>
+              <button className="btn btn-primary" onClick={() => handleGuardar(editando)} disabled={loading || !!errorModal}>Guardar</button>
             </div>
           </div>
         </div>

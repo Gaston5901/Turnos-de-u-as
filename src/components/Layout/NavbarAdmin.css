@@ -89,7 +89,7 @@
 .sidebar-logout {
   margin: 16px 18px;
   padding: 12px;
-  background: #f8bbd0;
+  background: #be5177;
   color: #ad1457;
   border: none;
   border-radius: 10px;
@@ -133,7 +133,7 @@
     width: 85vw !important;
     min-width: 230px !important;
     max-width: 95vw !important;
-    background: linear-gradient(135deg, #f8bbd0 0%, #d13fa0 60%, #8e24aa 100%) !important;
+    background: linear-gradient(135deg, #dd5685 0%, #d13fa0 60%, #8e24aa 100%) !important;
     box-shadow: 0 0 28px rgba(0,0,0,0.25);
     border-radius: 0 18px 18px 0;
     animation: slideInSidebar 0.35s cubic-bezier(.4,0,.2,1);

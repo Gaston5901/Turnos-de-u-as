@@ -25,12 +25,28 @@ const ReservarTurno = () => {
   const [fechaSeleccionada, setFechaSeleccionada] = useState('');
   const [horaSeleccionada, setHoraSeleccionada] = useState('');
   const [estadoHorarios, setEstadoHorarios] = useState({ todos: [], ocupados: [], disponibles: [] });
+  const [loadingHorarios, setLoadingHorarios] = useState(false);
+  const [errorHorarios, setErrorHorarios] = useState('');
   const [loading, setLoading] = useState(true);
   const [paso, setPaso] = useState(1);
+  const isGuest = !user;
+  const [slowConnection, setSlowConnection] = useState(false);
 
   useEffect(() => {
     cargarServicios();
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setSlowConnection(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setSlowConnection(true);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
 
   useEffect(() => {
     if (fechaSeleccionada) cargarEstadoHorarios(fechaSeleccionada);
@@ -48,6 +64,8 @@ const ReservarTurno = () => {
   };
 
   const cargarEstadoHorarios = async (fecha) => {
+    setLoadingHorarios(true);
+    setErrorHorarios('');
     try {
       const resp = await horariosAPI.getPorDia();
       const horariosPorDia = resp.data || {};
@@ -86,10 +104,15 @@ const ReservarTurno = () => {
       });
     } catch (error) {
       console.error('Error al cargar horarios:', error);
+      setEstadoHorarios({ todos: [], ocupados: [], disponibles: [] });
+      setErrorHorarios('No se pudieron cargar los horarios. Intentá nuevamente.');
+    } finally {
+      setLoadingHorarios(false);
     }
   };
 
   const seleccionarServicio = (servicio) => {
+    if (isGuest) return;
     setServicioSeleccionado(servicio);
     setPaso(2);
     setTimeout(() => {
@@ -101,8 +124,11 @@ const ReservarTurno = () => {
   };
 
   const seleccionarFecha = (fecha) => {
+    if (isGuest) return;
     setFechaSeleccionada(fecha);
     setHoraSeleccionada('');
+    setEstadoHorarios({ todos: [], ocupados: [], disponibles: [] });
+    setErrorHorarios('');
     setPaso(3);
     setTimeout(() => {
       if (horaInicioRef.current) {
@@ -113,6 +139,7 @@ const ReservarTurno = () => {
   };
 
   const seleccionarHora = (hora, ocupado = false) => {
+    if (isGuest) return;
     if (ocupado) {
       toast.error('Ese horario ya está reservado');
       return;
@@ -157,20 +184,7 @@ const ReservarTurno = () => {
   };
 
   const agregarAlCarritoYContinuar = () => {
-    if (!user) {
-      // Guardar selección en localStorage y redirigir a login
-      if (servicioSeleccionado && fechaSeleccionada && horaSeleccionada) {
-        localStorage.setItem('reservaPendiente', JSON.stringify({
-          servicioSeleccionado,
-          fechaSeleccionada,
-          horaSeleccionada
-        }));
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      toast.info('Iniciá sesión o creá tu cuenta para continuar');
-      navigate('/login');
-      return;
-    }
+    if (isGuest) return;
     // Si está logueado, flujo normal
     agregarAlCarrito(servicioSeleccionado, fechaSeleccionada, horaSeleccionada);
     navigate('/carrito', { state: { scrollToResumen: true } });
@@ -193,11 +207,54 @@ const ReservarTurno = () => {
       <div className="container" style={{ textAlign: 'center', padding: '100px 20px' }}>
         <div className="spinner"></div>
         <p>Cargando...</p>
+        {slowConnection && (
+          <p style={{ marginTop: 10, color: '#d13fa0', fontWeight: 600 }}>
+            Conexión lenta. Esto puede demorar un poco.
+          </p>
+        )}
       </div>
     );
 
   return (
     <div className="reservar-page">
+      {isGuest && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(10,10,10,0.35)',
+            zIndex: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+            backdropFilter: 'blur(2px)'
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 420,
+              width: '100%',
+              background: '#fff',
+              borderRadius: 18,
+              padding: '20px 22px',
+              textAlign: 'center',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+            }}
+          >
+            <h3 style={{ margin: 0, color: '#d13fa0' }}>Iniciá sesión</h3>
+            <p style={{ margin: '10px 0 16px', color: '#444' }}>
+              Para reservar un turno necesitás tener una cuenta.
+            </p>
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate('/login')}
+            >
+              Ir a iniciar sesión
+            </button>
+          </div>
+        </div>
+      )}
       <div className="reservar-header">
         <h1>
           <span className="header-icon">
@@ -312,7 +369,19 @@ const ReservarTurno = () => {
               </button>
             </div>
 
-            {estadoHorarios.todos.length > 0 ? (
+            {loadingHorarios ? (
+              <div className="no-horarios" style={{ alignItems: 'center' }}>
+                <div className="spinner"></div>
+                <p>Cargando horarios...</p>
+              </div>
+            ) : errorHorarios ? (
+              <div className="no-horarios">
+                <p>{errorHorarios}</p>
+                <button className="btn btn-secondary" onClick={() => cargarEstadoHorarios(fechaSeleccionada)}>
+                  Reintentar
+                </button>
+              </div>
+            ) : estadoHorarios.todos.length > 0 ? (
               <>
                 <div className="horarios-grid">
                   {estadoHorarios.todos.map((hora) => {

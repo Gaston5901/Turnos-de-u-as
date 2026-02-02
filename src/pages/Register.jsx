@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +18,15 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    document.body.classList.add('auth-body');
+    return () => document.body.classList.remove('auth-body');
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -63,7 +72,7 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label id="nombre" className="form-label">Nombre de Usuario</label>
+            <label id="nombre" className="form-label">Nombre de Usuario (Apodo)</label>
             <input
               type="text"
               name="nombre"
