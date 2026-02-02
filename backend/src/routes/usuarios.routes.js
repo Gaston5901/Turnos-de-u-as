@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { obtenerUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario, obtenerUsuario, login, recuperarPassword, resetearPassword } from "../controllers/usuarios.controllers.js";
-import { validarUsuario } from "../helpers/validarUsuario.js";
+import { validarUsuario, validarUsuarioUpdate } from "../helpers/validarUsuario.js";
 import { validationResult } from "express-validator";
 
 const router = Router();
@@ -18,7 +18,7 @@ router.post("/", validarUsuario, (req, res, next) => {
 	crearUsuario(req, res, next);
 });
 
-router.put("/:id", validarUsuario, (req, res, next) => {
+router.put("/:id", validarUsuarioUpdate, (req, res, next) => {
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
 		return res.status(400).json({ errores: errors.array() });

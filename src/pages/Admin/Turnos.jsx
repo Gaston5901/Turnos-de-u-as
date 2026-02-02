@@ -179,7 +179,14 @@ const Turnos = () => {
         console.log('Payload usuario:', nuevoUsuario);
         try {
           const userRes = await usuariosAPI.create(nuevoUsuario);
-          usuario = userRes.data;
+          const createdUser = userRes.data?.usuario || userRes.data;
+          usuario = {
+            ...createdUser,
+            id: createdUser?.id || createdUser?._id,
+            email: createdUser?.email || nuevoUsuario.email,
+            nombre: createdUser?.nombre || nuevoUsuario.nombre,
+            telefono: createdUser?.telefono || nuevoUsuario.telefono,
+          };
         } catch (userError) {
           // Mostrar todos los errores de validación del backend
           if (userError?.response?.data?.errores) {
