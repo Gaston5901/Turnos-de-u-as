@@ -4,17 +4,25 @@ import { Clock } from 'lucide-react';
 
 const HorarioSelectorAdmin = ({ fecha, onSelect }) => {
   const [estadoHorarios, setEstadoHorarios] = useState({ todos: [], ocupados: [], disponibles: [] });
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const cargar = async () => {
+      setLoading(true);
       const estado = await horariosAPI.getEstadoDia(fecha);
       setEstadoHorarios(estado);
+      setLoading(false);
     };
     cargar();
   }, [fecha]);
   return (
     <div>
       <h4>Seleccioná el horario</h4>
-      {estadoHorarios.todos.length === 0 ? (
+      {loading ? (
+        <div className="no-horarios" style={{ alignItems: 'center' }}>
+          <div className="spinner"></div>
+          <p>Cargando horarios...</p>
+        </div>
+      ) : estadoHorarios.todos.length === 0 ? (
         <div className="no-horarios">
           <p>Este día no tiene horarios configurados.</p>
         </div>
