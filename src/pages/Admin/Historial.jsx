@@ -253,7 +253,12 @@ const Historial = () => {
   );
 
   if (loading) {
-    return <p style={{ padding: 100, textAlign: 'center' }}>Cargando historial...</p>;
+    return (
+      <div style={{ padding: 100, textAlign: 'center' }}>
+        <div className="spinner"></div>
+        <p>Cargando historial...</p>
+      </div>
+    );
   }
 
   return (

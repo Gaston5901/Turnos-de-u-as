@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { serviciosAPI } from '../../services/api';
 import { Package, Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import './Admin.css';
 
 import ServicioModal from './ServicioModal';
@@ -73,14 +74,25 @@ const ServiciosAdmin = () => {
   };
 
   const handleEliminar = async (id) => {
-    if (window.confirm('¿Estás segura de eliminar este servicio?')) {
-      try {
-        await serviciosAPI.delete(id);
-        toast.success('Servicio eliminado');
-        cargarServicios();
-      } catch (error) {
-        toast.error('Error al eliminar servicio');
-      }
+    const result = await Swal.fire({
+      title: '¿Eliminar servicio?'
+      ,text: 'Esta acción no se puede deshacer.'
+      ,icon: 'warning'
+      ,showCancelButton: true
+      ,confirmButtonText: 'Sí, eliminar'
+      ,cancelButtonText: 'Cancelar'
+      ,confirmButtonColor: '#d13fa0'
+      ,cancelButtonColor: '#6b7280'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await serviciosAPI.delete(id);
+      toast.success('Servicio eliminado');
+      cargarServicios();
+    } catch (error) {
+      toast.error('Error al eliminar servicio');
     }
   };
 
