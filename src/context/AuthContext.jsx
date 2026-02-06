@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { usuariosAPI } from '../services/api';
+import { usuariosAPI, turnosAPI } from '../services/api';
+import { useCarritoStore } from '../store/useCarritoStore';
 import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
@@ -15,6 +16,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const vaciarCarrito = useCarritoStore((state) => state.vaciarCarrito);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -23,6 +25,30 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (!user || (!user._id && !user.id)) return;
+    const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
+    if (!pagoIdPendiente) return;
+
+    const reconciliar = async () => {
+      try {
+        const turnos = await turnosAPI.getByUsuario(user._id || user.id);
+        const confirmado = Array.isArray(turnos) && turnos.some(
+          (turno) => turno.pagoId === pagoIdPendiente && turno.estado === 'confirmado'
+        );
+        if (confirmado) {
+          vaciarCarrito();
+          localStorage.removeItem('mpPagoIdPendiente');
+          toast.success('Pago confirmado. Turno guardado.');
+        }
+      } catch (error) {
+        // Sin accion: si falla, se reintenta cuando el usuario vuelva a abrir la app.
+      }
+    };
+
+    reconciliar();
+  }, [user, vaciarCarrito]);
 
   const login = async (email, password) => {
     try {

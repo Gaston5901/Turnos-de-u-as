@@ -42,6 +42,7 @@ const Carrito = () => {
     setProcesando(true);
     try {
       const pagoIdGlobal = 'MP' + Date.now() + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('mpPagoIdPendiente', pagoIdGlobal);
 
       const turnosData = items.map((item) => ({
         email: user.email,
@@ -126,6 +127,7 @@ const Carrito = () => {
         mpProcesadoRef.current = true;
         setMpReturnProcessing(true);
         sessionStorage.removeItem('mpPagoPendiente');
+        localStorage.removeItem('mpPagoIdPendiente');
         toast.info('Pago aprobado. Estamos confirmando tu turno...', { autoClose: 5000 });
         vaciarCarrito();
         setTimeout(() => {
@@ -139,10 +141,48 @@ const Carrito = () => {
 
     if (status && status !== 'approved') {
       sessionStorage.removeItem('mpPagoPendiente');
+      localStorage.removeItem('mpPagoIdPendiente');
       setMpReturnProcessing(false);
       toast.error('El pago no se completó en Mercado Pago');
     }
   }, [items.length, procesando]);
+
+  useEffect(() => {
+    if (!user || (!user._id && !user.id)) return;
+    const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
+    if (!pagoIdPendiente) return;
+
+    let intentos = 0;
+    const maxIntentos = 15;
+    const intervalMs = 8000;
+
+    const intervalId = setInterval(async () => {
+      intentos += 1;
+      try {
+        const turnos = await turnosAPI.getByUsuario(user._id || user.id);
+        const confirmado = Array.isArray(turnos) && turnos.some(
+          (turno) => turno.pagoId === pagoIdPendiente && turno.estado === 'confirmado'
+        );
+        if (confirmado) {
+          clearInterval(intervalId);
+          localStorage.removeItem('mpPagoIdPendiente');
+          vaciarCarrito();
+          toast.success('Pago confirmado. Turno guardado.');
+          navigate('/mis-turnos');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+      } catch (error) {
+        // Si falla, seguimos intentando hasta agotar el tiempo.
+      }
+
+      if (intentos >= maxIntentos) {
+        clearInterval(intervalId);
+      }
+    }, intervalMs);
+
+    return () => clearInterval(intervalId);
+  }, [user, navigate, vaciarCarrito]);
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
