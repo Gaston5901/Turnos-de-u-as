@@ -152,6 +152,10 @@ const Carrito = () => {
     const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
     if (!pagoIdPendiente) return;
 
+    if (!mpReturnProcessing) {
+      setMpReturnProcessing(true);
+    }
+
     let intentos = 0;
     const maxIntentos = 15;
     const intervalMs = 8000;
@@ -170,6 +174,7 @@ const Carrito = () => {
           toast.success('Pago confirmado. Turno guardado.');
           navigate('/mis-turnos');
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          setMpReturnProcessing(false);
           return;
         }
       } catch (error) {
@@ -178,11 +183,14 @@ const Carrito = () => {
 
       if (intentos >= maxIntentos) {
         clearInterval(intervalId);
+        setMpReturnProcessing(false);
       }
     }, intervalMs);
 
-    return () => clearInterval(intervalId);
-  }, [user, navigate, vaciarCarrito]);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user, navigate, vaciarCarrito, mpReturnProcessing]);
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
