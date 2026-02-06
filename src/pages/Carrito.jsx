@@ -27,7 +27,6 @@ const Carrito = () => {
   const [procesando, setProcesando] = useState(false);
   const [mpReturnProcessing, setMpReturnProcessing] = useState(false);
   const mpProcesadoRef = useRef(false);
-  const mpCheckRef = useRef({ running: false, timer: null, count: 0 });
 
   const withTimeout = (promise, ms, label = 'Operación') =>
     Promise.race([
@@ -148,35 +147,33 @@ const Carrito = () => {
     }
   }, [items.length, procesando]);
 
-  const iniciarChequeoPagoPendiente = () => {
+  useEffect(() => {
     if (!user || (!user._id && !user.id)) return;
     const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
-    if (!pagoIdPendiente) {
-      setMpReturnProcessing(false);
-      return;
+    if (!pagoIdPendiente) return;
+
+    if (!mpReturnProcessing) {
+      setMpReturnProcessing(true);
     }
 
-    if (mpCheckRef.current.running) return;
-    mpCheckRef.current.running = true;
-    mpCheckRef.current.count = 0;
-    setMpReturnProcessing(true);
+    let intentos = 0;
+    const maxIntentos = 15;
+    const intervalMs = 8000;
 
-    const maxIntentos = 10;
-    const delayMs = 6000;
-
-    const intentar = async () => {
+    const intervalId = setInterval(async () => {
+      intentos += 1;
       try {
         const turnos = await turnosAPI.getByUsuario(user._id || user.id);
         const confirmado = Array.isArray(turnos) && turnos.some(
           (turno) => turno.pagoId === pagoIdPendiente && turno.estado === 'confirmado'
         );
         if (confirmado) {
+          clearInterval(intervalId);
           localStorage.removeItem('mpPagoIdPendiente');
           vaciarCarrito();
           toast.success('Pago confirmado. Turno guardado.');
           navigate('/mis-turnos');
           window.scrollTo({ top: 0, behavior: 'smooth' });
-          mpCheckRef.current.running = false;
           setMpReturnProcessing(false);
           return;
         }
@@ -184,39 +181,16 @@ const Carrito = () => {
         // Si falla, seguimos intentando hasta agotar el tiempo.
       }
 
-      mpCheckRef.current.count += 1;
-      if (mpCheckRef.current.count >= maxIntentos) {
-        mpCheckRef.current.running = false;
+      if (intentos >= maxIntentos) {
+        clearInterval(intervalId);
         setMpReturnProcessing(false);
-        return;
       }
-
-      mpCheckRef.current.timer = setTimeout(intentar, delayMs);
-    };
-
-    intentar();
-  };
-
-  useEffect(() => {
-    iniciarChequeoPagoPendiente();
-
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        iniciarChequeoPagoPendiente();
-      }
-    };
-
-    window.addEventListener('focus', iniciarChequeoPagoPendiente);
-    document.addEventListener('visibilitychange', onVisibility);
+    }, intervalMs);
 
     return () => {
-      window.removeEventListener('focus', iniciarChequeoPagoPendiente);
-      document.removeEventListener('visibilitychange', onVisibility);
-      if (mpCheckRef.current.timer) {
-        clearTimeout(mpCheckRef.current.timer);
-      }
+      clearInterval(intervalId);
     };
-  }, [user, navigate, vaciarCarrito]);
+  }, [user, navigate, vaciarCarrito, mpReturnProcessing]);
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
