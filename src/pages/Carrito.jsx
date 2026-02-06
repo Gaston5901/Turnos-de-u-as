@@ -36,9 +36,10 @@ const Carrito = () => {
         precio: item.servicio.precio / 2, // Seña 50%
         cantidad: 1
       }));
-      
+
       const data = await crearPreferencia(carritoMP);
       if (data.init_point) {
+        sessionStorage.setItem('mpPagoPendiente', '1');
         window.location.href = data.init_point;
       } else {
         toast.error('No se pudo iniciar el pago');
@@ -49,6 +50,28 @@ const Carrito = () => {
       setProcesando(false);
     }
   };
+
+  useEffect(() => {
+    const mpPendiente = sessionStorage.getItem('mpPagoPendiente');
+    if (!mpPendiente) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status') || params.get('collection_status');
+    const approved = status === 'approved' || params.get('payment_id');
+
+    if (approved && !procesando && items.length > 0) {
+      sessionStorage.removeItem('mpPagoPendiente');
+      procesarPago();
+      return;
+    }
+
+    if (status && status !== 'approved') {
+      sessionStorage.removeItem('mpPagoPendiente');
+      toast.error('El pago no se completó en Mercado Pago');
+    }
+  }, [items.length, procesando]);
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
