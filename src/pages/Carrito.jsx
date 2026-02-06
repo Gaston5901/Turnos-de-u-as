@@ -77,8 +77,6 @@ const Carrito = () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
     setProcesando(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulación pago
-
       const withTimeout = (promise, ms, label = 'Operación') =>
         Promise.race([
           promise,
@@ -92,31 +90,39 @@ const Carrito = () => {
       const confirmadosIds = [];
       const fallidos = [];
 
-      // Crear turnos uno por uno para poder dejar en el carrito solo los que fallaron.
-      for (const item of items) {
-        const turnoData = {
-          email: user.email,
-          nombre: user.nombre,
-          telefono: user.telefono || '',
-          servicio: item.servicio.id,
-          fecha: item.fecha,
-          hora: item.hora,
-          estado: 'confirmado',
-          pagoId: pagoIdGlobal,
-          montoPagado: item.servicio.precio / 2,
-          montoTotal: item.servicio.precio,
-          createdAt: new Date().toISOString(),
-        };
+      const resultados = await Promise.allSettled(
+        items.map(async (item) => {
+          const turnoData = {
+            email: user.email,
+            nombre: user.nombre,
+            telefono: user.telefono || '',
+            servicio: item.servicio.id,
+            fecha: item.fecha,
+            hora: item.hora,
+            estado: 'confirmado',
+            pagoId: pagoIdGlobal,
+            montoPagado: item.servicio.precio / 2,
+            montoTotal: item.servicio.precio,
+            createdAt: new Date().toISOString(),
+          };
 
-        try {
           await withTimeout(turnosAPI.create(turnoData), 45000, 'Creación de turno');
-          confirmadosIds.push(item.id);
-        } catch (err) {
-          const status = err?.response?.status;
-          const mensaje = err?.response?.data?.mensaje || err?.message || 'Error desconocido';
-          fallidos.push({ item, status, mensaje });
+          return { id: item.id };
+        })
+      );
+
+      resultados.forEach((resultado, index) => {
+        if (resultado.status === 'fulfilled') {
+          confirmadosIds.push(resultado.value.id);
+          return;
         }
-      }
+
+        const item = items[index];
+        const err = resultado.reason;
+        const status = err?.response?.status;
+        const mensaje = err?.response?.data?.mensaje || err?.message || 'Error desconocido';
+        fallidos.push({ item, status, mensaje });
+      });
 
       // Sacar del carrito los turnos que ya quedaron confirmados
       confirmadosIds.forEach((id) => eliminarDelCarrito(id));

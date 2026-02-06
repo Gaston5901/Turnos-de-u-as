@@ -12,8 +12,9 @@ const PagoExitoso = () => {
 
   return (
     <div className="carrito-vacio">
-      <h2>Redirigiendo al carrito...</h2>
-      <p>Si no pasa nada, hace click abajo.</p>
+      <div className="spinner" style={{ width: '48px', height: '48px', borderWidth: '4px' }}></div>
+      <h2>Confirmando pago...</h2>
+      <p>En unos segundos te llevamos a Mis Turnos.</p>
       <Link className="btn btn-primary" to="/carrito?status=approved">
         Volver a la tienda
       </Link>
