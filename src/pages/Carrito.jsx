@@ -27,6 +27,7 @@ const Carrito = () => {
   const [procesando, setProcesando] = useState(false);
   const [mpReturnProcessing, setMpReturnProcessing] = useState(false);
   const mpProcesadoRef = useRef(false);
+  const mpReturnTimeoutRef = useRef(null);
 
   const withTimeout = (promise, ms, label = 'Operación') =>
     Promise.race([
@@ -148,9 +149,39 @@ const Carrito = () => {
   }, [items.length, procesando]);
 
   useEffect(() => {
+    if (!mpReturnProcessing) {
+      if (mpReturnTimeoutRef.current) {
+        clearTimeout(mpReturnTimeoutRef.current);
+        mpReturnTimeoutRef.current = null;
+      }
+      return;
+    }
+
+    if (mpReturnTimeoutRef.current) {
+      clearTimeout(mpReturnTimeoutRef.current);
+    }
+
+    mpReturnTimeoutRef.current = setTimeout(() => {
+      setMpReturnProcessing(false);
+    }, 15000);
+
+    return () => {
+      if (mpReturnTimeoutRef.current) {
+        clearTimeout(mpReturnTimeoutRef.current);
+        mpReturnTimeoutRef.current = null;
+      }
+    };
+  }, [mpReturnProcessing]);
+
+  useEffect(() => {
     if (!user || (!user._id && !user.id)) return;
     const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
-    if (!pagoIdPendiente) return;
+    if (!pagoIdPendiente) {
+      setMpReturnProcessing(false);
+      return;
+    }
+
+    setMpReturnProcessing(true);
 
     let intentos = 0;
     const maxIntentos = 15;
@@ -170,6 +201,7 @@ const Carrito = () => {
           toast.success('Pago confirmado. Turno guardado.');
           navigate('/mis-turnos');
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          setMpReturnProcessing(false);
           return;
         }
       } catch (error) {
@@ -178,6 +210,9 @@ const Carrito = () => {
 
       if (intentos >= maxIntentos) {
         clearInterval(intervalId);
+        localStorage.removeItem('mpPagoIdPendiente');
+        setMpReturnProcessing(false);
+        toast.info('No pudimos confirmar el pago. Revisá Mis Turnos en unos minutos.', { autoClose: 6000 });
       }
     }, intervalMs);
 
