@@ -25,6 +25,7 @@ const Carrito = () => {
     }, []);
   const { user } = useAuth();
   const [procesando, setProcesando] = useState(false);
+  const [mpReturnProcessing, setMpReturnProcessing] = useState(false);
 
   // Botón para pagar con Mercado Pago
   const pagarConMercadoPago = async () => {
@@ -63,6 +64,7 @@ const Carrito = () => {
 
     if (approved && !procesando && items.length > 0) {
       sessionStorage.removeItem('mpPagoPendiente');
+      setMpReturnProcessing(true);
       procesarPago();
       return;
     }
@@ -148,8 +150,21 @@ const Carrito = () => {
     } catch (error) {
       console.error('Error al procesar el pago:', error);
       toast.error('Error al procesar el pago. Intenta nuevamente.');
-    } finally { setProcesando(false); }
+    } finally {
+      setProcesando(false);
+      setMpReturnProcessing(false);
+    }
   };
+
+  if (mpReturnProcessing) {
+    return (
+      <div className="carrito-vacio">
+        <div className="spinner" style={{ width: '48px', height: '48px', borderWidth: '4px' }}></div>
+        <h2>Confirmando pago...</h2>
+        <p>En unos segundos te llevamos a Mis Turnos.</p>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

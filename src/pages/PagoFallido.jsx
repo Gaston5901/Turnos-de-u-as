@@ -12,8 +12,9 @@ const PagoFallido = () => {
 
   return (
     <div className="carrito-vacio">
+      <div className="spinner" style={{ width: '48px', height: '48px', borderWidth: '4px' }}></div>
       <h2>Pago no completado</h2>
-      <p>Te llevamos al carrito para reintentar.</p>
+      <p>En unos segundos te llevamos al carrito para reintentar.</p>
       <Link className="btn btn-primary" to="/carrito?status=failure">
         Volver a la tienda
       </Link>
