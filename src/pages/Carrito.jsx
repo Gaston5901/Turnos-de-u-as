@@ -26,6 +26,7 @@ const Carrito = () => {
   const { user } = useAuth();
   const [procesando, setProcesando] = useState(false);
   const [mpReturnProcessing, setMpReturnProcessing] = useState(false);
+  const [mpCheckToken, setMpCheckToken] = useState(0);
   const mpProcesadoRef = useRef(false);
   const mpReturnTimeoutRef = useRef(null);
 
@@ -178,6 +179,31 @@ const Carrito = () => {
   }, [mpReturnProcessing]);
 
   useEffect(() => {
+    const triggerCheck = () => {
+      const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
+      const turnosPendientesRaw = localStorage.getItem('mpTurnosPendientes');
+      if (pagoIdPendiente && turnosPendientesRaw) {
+        setMpCheckToken((token) => token + 1);
+      }
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        triggerCheck();
+      }
+    };
+
+    triggerCheck();
+    window.addEventListener('focus', triggerCheck);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      window.removeEventListener('focus', triggerCheck);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!user || (!user._id && !user.id)) return;
     const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
     const turnosPendientesRaw = localStorage.getItem('mpTurnosPendientes');
@@ -229,7 +255,7 @@ const Carrito = () => {
     }, intervalMs);
 
     return () => clearInterval(intervalId);
-  }, [user, navigate, vaciarCarrito]);
+  }, [user, navigate, vaciarCarrito, mpCheckToken]);
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
