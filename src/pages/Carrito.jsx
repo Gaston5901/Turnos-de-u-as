@@ -27,6 +27,7 @@ const Carrito = () => {
   const [procesando, setProcesando] = useState(false);
   const [mpReturnProcessing, setMpReturnProcessing] = useState(false);
   const mpProcesadoRef = useRef(false);
+  const mpCheckRef = useRef({ running: false, timer: null, count: 0 });
 
   const withTimeout = (promise, ms, label = 'Operación') =>
     Promise.race([
@@ -147,33 +148,35 @@ const Carrito = () => {
     }
   }, [items.length, procesando]);
 
-  useEffect(() => {
+  const iniciarChequeoPagoPendiente = () => {
     if (!user || (!user._id && !user.id)) return;
     const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
-    if (!pagoIdPendiente) return;
-
-    if (!mpReturnProcessing) {
-      setMpReturnProcessing(true);
+    if (!pagoIdPendiente) {
+      setMpReturnProcessing(false);
+      return;
     }
 
-    let intentos = 0;
-    const maxIntentos = 15;
-    const intervalMs = 8000;
+    if (mpCheckRef.current.running) return;
+    mpCheckRef.current.running = true;
+    mpCheckRef.current.count = 0;
+    setMpReturnProcessing(true);
 
-    const intervalId = setInterval(async () => {
-      intentos += 1;
+    const maxIntentos = 10;
+    const delayMs = 6000;
+
+    const intentar = async () => {
       try {
         const turnos = await turnosAPI.getByUsuario(user._id || user.id);
         const confirmado = Array.isArray(turnos) && turnos.some(
           (turno) => turno.pagoId === pagoIdPendiente && turno.estado === 'confirmado'
         );
         if (confirmado) {
-          clearInterval(intervalId);
           localStorage.removeItem('mpPagoIdPendiente');
           vaciarCarrito();
           toast.success('Pago confirmado. Turno guardado.');
           navigate('/mis-turnos');
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          mpCheckRef.current.running = false;
           setMpReturnProcessing(false);
           return;
         }
@@ -181,16 +184,39 @@ const Carrito = () => {
         // Si falla, seguimos intentando hasta agotar el tiempo.
       }
 
-      if (intentos >= maxIntentos) {
-        clearInterval(intervalId);
+      mpCheckRef.current.count += 1;
+      if (mpCheckRef.current.count >= maxIntentos) {
+        mpCheckRef.current.running = false;
         setMpReturnProcessing(false);
+        return;
       }
-    }, intervalMs);
+
+      mpCheckRef.current.timer = setTimeout(intentar, delayMs);
+    };
+
+    intentar();
+  };
+
+  useEffect(() => {
+    iniciarChequeoPagoPendiente();
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        iniciarChequeoPagoPendiente();
+      }
+    };
+
+    window.addEventListener('focus', iniciarChequeoPagoPendiente);
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
-      clearInterval(intervalId);
+      window.removeEventListener('focus', iniciarChequeoPagoPendiente);
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (mpCheckRef.current.timer) {
+        clearTimeout(mpCheckRef.current.timer);
+      }
     };
-  }, [user, navigate, vaciarCarrito, mpReturnProcessing]);
+  }, [user, navigate, vaciarCarrito]);
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
