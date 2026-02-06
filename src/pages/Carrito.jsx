@@ -28,18 +28,75 @@ const Carrito = () => {
   const [mpReturnProcessing, setMpReturnProcessing] = useState(false);
   const mpProcesadoRef = useRef(false);
 
+  const withTimeout = (promise, ms, label = 'Operación') =>
+    Promise.race([
+      promise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`${label} tardó demasiado (${ms}ms)`)), ms)
+      ),
+    ]);
+
   // Botón para pagar con Mercado Pago
   const pagarConMercadoPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
     setProcesando(true);
     try {
+      const pagoIdGlobal = 'MP' + Date.now() + Math.random().toString(36).substr(2, 9);
+
+      const turnosData = items.map((item) => ({
+        email: user.email,
+        nombre: user.nombre,
+        telefono: user.telefono || '',
+        servicio: item.servicio.id,
+        fecha: item.fecha,
+        hora: item.hora,
+        estado: 'pendiente',
+        pagoId: pagoIdGlobal,
+        montoPagado: item.servicio.precio / 2,
+        montoTotal: item.servicio.precio,
+        enviarEmail: false,
+        createdAt: new Date().toISOString(),
+      }));
+
+      const resultadosTurnos = await Promise.allSettled(
+        turnosData.map((turno) =>
+          withTimeout(turnosAPI.create(turno), 45000, 'Creación de turno')
+        )
+      );
+
+      const turnosIds = [];
+      const fallidos = [];
+
+      resultadosTurnos.forEach((resultado, index) => {
+        if (resultado.status === 'fulfilled') {
+          const creado = resultado.value?.data || {};
+          const id = creado.id || creado._id;
+          if (id) {
+            turnosIds.push(id);
+            return;
+          }
+          fallidos.push({ item: items[index], mensaje: 'Respuesta inválida del servidor' });
+          return;
+        }
+
+        const err = resultado.reason;
+        const mensaje = err?.response?.data?.mensaje || err?.message || 'Error desconocido';
+        fallidos.push({ item: items[index], mensaje });
+      });
+
+      if (fallidos.length > 0) {
+        toast.error(fallidos[0].mensaje || 'No se pudo preparar el pago');
+        return;
+      }
+
       const carritoMP = items.map(item => ({
         titulo: item.servicio.nombre,
         precio: item.servicio.precio / 2, // Seña 50%
         cantidad: 1
       }));
 
-      const data = await crearPreferencia(carritoMP);
+      const metadata = { turnosIds, pagoId: pagoIdGlobal };
+      const data = await crearPreferencia(carritoMP, metadata);
       if (data.init_point) {
         sessionStorage.setItem('mpPagoPendiente', '1');
         window.location.href = data.init_point;
@@ -66,13 +123,16 @@ const Carrito = () => {
 
     if (approved) {
       if (!mpProcesadoRef.current) {
-        setMpReturnProcessing(true);
-      }
-
-      if (!procesando && items.length > 0 && !mpProcesadoRef.current) {
         mpProcesadoRef.current = true;
+        setMpReturnProcessing(true);
         sessionStorage.removeItem('mpPagoPendiente');
-        procesarPago();
+        toast.info('Pago aprobado. Estamos confirmando tu turno...', { autoClose: 5000 });
+        vaciarCarrito();
+        setTimeout(() => {
+          navigate('/mis-turnos');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setMpReturnProcessing(false);
+        }, 800);
       }
       return;
     }
@@ -88,14 +148,6 @@ const Carrito = () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
     setProcesando(true);
     try {
-      const withTimeout = (promise, ms, label = 'Operación') =>
-        Promise.race([
-          promise,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error(`${label} tardó demasiado (${ms}ms)`)), ms)
-          ),
-        ]);
-
       const pagoIdGlobal = 'MP' + Date.now() + Math.random().toString(36).substr(2, 9);
 
       const confirmadosIds = [];

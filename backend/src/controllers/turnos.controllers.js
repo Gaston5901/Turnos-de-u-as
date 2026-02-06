@@ -170,6 +170,11 @@ export const crearTurno = async (req, res) => {
     delete resp._id;
     res.status(201).json(resp);
 
+    const enviarEmail = req.body.enviarEmail !== false && req.body.enviarEmail !== 'false';
+    if (!enviarEmail) {
+      return;
+    }
+
     // Obtener datos para el email
     const servicioDoc = await ServiciosModel.findById(turno.servicio);
     const serviciosArr = [{
