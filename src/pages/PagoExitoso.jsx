@@ -6,6 +6,7 @@ const PagoExitoso = () => {
   const location = useLocation();
 
   useEffect(() => {
+    sessionStorage.setItem('mpPagoPendiente', '1');
     const search = location.search || '?status=approved';
     navigate(`/carrito${search}`, { replace: true });
   }, [location.search, navigate]);

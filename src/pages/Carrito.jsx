@@ -26,6 +26,7 @@ const Carrito = () => {
   const { user } = useAuth();
   const [procesando, setProcesando] = useState(false);
   const [mpReturnProcessing, setMpReturnProcessing] = useState(false);
+  const mpProcesadoRef = useRef(false);
 
   // Botón para pagar con Mercado Pago
   const pagarConMercadoPago = async () => {
@@ -53,24 +54,32 @@ const Carrito = () => {
   };
 
   useEffect(() => {
-    const mpPendiente = sessionStorage.getItem('mpPagoPendiente');
-    if (!mpPendiente) {
-      return;
-    }
-
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status') || params.get('collection_status');
     const approved = status === 'approved' || params.get('payment_id');
+    const mpPendiente = sessionStorage.getItem('mpPagoPendiente');
+    const esRetornoMP = Boolean(status || mpPendiente || params.get('payment_id'));
 
-    if (approved && !procesando && items.length > 0) {
-      sessionStorage.removeItem('mpPagoPendiente');
-      setMpReturnProcessing(true);
-      procesarPago();
+    if (!esRetornoMP) {
+      return;
+    }
+
+    if (approved) {
+      if (!mpProcesadoRef.current) {
+        setMpReturnProcessing(true);
+      }
+
+      if (!procesando && items.length > 0 && !mpProcesadoRef.current) {
+        mpProcesadoRef.current = true;
+        sessionStorage.removeItem('mpPagoPendiente');
+        procesarPago();
+      }
       return;
     }
 
     if (status && status !== 'approved') {
       sessionStorage.removeItem('mpPagoPendiente');
+      setMpReturnProcessing(false);
       toast.error('El pago no se completó en Mercado Pago');
     }
   }, [items.length, procesando]);
