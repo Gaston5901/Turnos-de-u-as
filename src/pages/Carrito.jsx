@@ -91,6 +91,8 @@ const Carrito = () => {
         return;
       }
 
+      localStorage.setItem('mpTurnosPendientes', JSON.stringify(turnosIds));
+
       const carritoMP = items.map(item => ({
         titulo: item.servicio.nombre,
         precio: item.servicio.precio / 2, // Seña 50%
@@ -129,6 +131,7 @@ const Carrito = () => {
         setMpReturnProcessing(true);
         sessionStorage.removeItem('mpPagoPendiente');
         localStorage.removeItem('mpPagoIdPendiente');
+        localStorage.removeItem('mpTurnosPendientes');
         toast.info('Pago aprobado. Estamos confirmando tu turno...', { autoClose: 5000 });
         vaciarCarrito();
         setTimeout(() => {
@@ -143,6 +146,7 @@ const Carrito = () => {
     if (status && status !== 'approved') {
       sessionStorage.removeItem('mpPagoPendiente');
       localStorage.removeItem('mpPagoIdPendiente');
+      localStorage.removeItem('mpTurnosPendientes');
       setMpReturnProcessing(false);
       toast.error('El pago no se completó en Mercado Pago');
     }
@@ -176,7 +180,10 @@ const Carrito = () => {
   useEffect(() => {
     if (!user || (!user._id && !user.id)) return;
     const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
-    if (!pagoIdPendiente) {
+    const turnosPendientesRaw = localStorage.getItem('mpTurnosPendientes');
+    const turnosPendientes = turnosPendientesRaw ? JSON.parse(turnosPendientesRaw) : [];
+
+    if (!pagoIdPendiente || turnosPendientes.length === 0) {
       setMpReturnProcessing(false);
       return;
     }
@@ -191,12 +198,16 @@ const Carrito = () => {
       intentos += 1;
       try {
         const turnos = await turnosAPI.getByUsuario(user._id || user.id);
-        const confirmado = Array.isArray(turnos) && turnos.some(
-          (turno) => turno.pagoId === pagoIdPendiente && turno.estado === 'confirmado'
+        const confirmadosIds = new Set(
+          (Array.isArray(turnos) ? turnos : [])
+            .filter((turno) => turno.estado === 'confirmado')
+            .map((turno) => String(turno.id || turno._id))
         );
+        const confirmado = turnosPendientes.every((id) => confirmadosIds.has(String(id)));
         if (confirmado) {
           clearInterval(intervalId);
           localStorage.removeItem('mpPagoIdPendiente');
+          localStorage.removeItem('mpTurnosPendientes');
           vaciarCarrito();
           toast.success('Pago confirmado. Turno guardado.');
           navigate('/mis-turnos');
@@ -211,6 +222,7 @@ const Carrito = () => {
       if (intentos >= maxIntentos) {
         clearInterval(intervalId);
         localStorage.removeItem('mpPagoIdPendiente');
+        localStorage.removeItem('mpTurnosPendientes');
         setMpReturnProcessing(false);
         toast.info('No pudimos confirmar el pago. Revisá Mis Turnos en unos minutos.', { autoClose: 6000 });
       }
