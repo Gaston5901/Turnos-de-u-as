@@ -226,6 +226,7 @@ export const crearTurno = async (req, res) => {
           }),
           60000
         );
+        await TurnosModel.findByIdAndUpdate(turno._id, { emailEnviado: true });
       } catch (mailError) {
         console.error('Error enviando comprobante de turno (no bloquea la reserva):', mailError);
       }

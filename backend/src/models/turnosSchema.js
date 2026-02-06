@@ -57,6 +57,10 @@ const turnoSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  emailEnviado: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

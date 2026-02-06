@@ -45,6 +45,16 @@ export async function procesarPagoAprobado(pago) {
       continue;
     }
 
+    const turnoParaEmail = await TurnosModel.findOneAndUpdate(
+      { _id: turnoId, emailEnviado: { $ne: true } },
+      { emailEnviado: true },
+      { new: true }
+    );
+
+    if (!turnoParaEmail) {
+      continue;
+    }
+
     // Enviar email de confirmación (si hay email guardado en el turno)
     try {
       const servicioDoc = turno.servicio ? await ServiciosModel.findById(turno.servicio) : null;
