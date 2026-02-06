@@ -191,8 +191,8 @@ const Carrito = () => {
     setMpReturnProcessing(true);
 
     let intentos = 0;
-    const maxIntentos = 15;
-    const intervalMs = 8000;
+    const maxIntentos = 12;
+    const intervalMs = 3000;
 
     const intervalId = setInterval(async () => {
       intentos += 1;
