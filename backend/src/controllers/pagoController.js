@@ -35,9 +35,14 @@ export async function crearPreferencia(req, res) {
     const frontendBaseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const backendBaseUrl = process.env.BACKEND_URL || "http://localhost:4000";
 
+    const isLocalhost = (url) => /localhost|127\.0\.0\.1/i.test(url || "");
+    const backendBase = String(backendBaseUrl || "").replace(/\/$/, "");
+
     // En local, Mercado Pago no puede llamar a localhost como webhook.
-    // Solo configuramos notification_url si el usuario la define explícitamente (p.ej. ngrok/https).
-    const notificationUrl = process.env.MP_WEBHOOK_URL || undefined;
+    // Usamos MP_WEBHOOK_URL si existe; si no, usamos BACKEND_URL si es publico.
+    const notificationUrl =
+      process.env.MP_WEBHOOK_URL ||
+      (!isLocalhost(backendBase) ? `${backendBase}/api/webhook` : undefined);
 
     const backUrls = {
       success: `${frontendBaseUrl}/pago-exitoso`,
