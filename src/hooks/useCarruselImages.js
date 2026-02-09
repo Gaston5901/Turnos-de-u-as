@@ -12,7 +12,7 @@ export default function useCarruselImages() {
 
     avisoTimeout = setTimeout(() => {
       avisoMostrado = true;
-      toast.info('Conexion lenta. Estamos cargando el carrusel...', { autoClose: 4000 });
+      toast.info('Conexion lenta. Esto puede tardar un momento...', { autoClose: 4000 });
     }, 4000);
 
     fetch(`${API_BASE_URL}/carrusel`)

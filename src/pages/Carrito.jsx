@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../store/useCarritoStore';
 import { useAuth } from '../context/AuthContext';
-import { turnosAPI } from '../services/api';
+import { horariosAPI, turnosAPI } from '../services/api';
 import { ShoppingCart, Trash2, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
@@ -30,6 +30,83 @@ const Carrito = () => {
   const mpProcesadoRef = useRef(false);
   const mpReturnTimeoutRef = useRef(null);
 
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    let cancelado = false;
+
+    const limpiarItemsInvalidos = async () => {
+      const ahora = new Date();
+      const porFecha = new Map();
+
+      items.forEach((item) => {
+        if (!porFecha.has(item.fecha)) {
+          porFecha.set(item.fecha, []);
+        }
+        porFecha.get(item.fecha).push(item);
+      });
+
+      const expirados = [];
+      const ocupados = [];
+
+      for (const [fecha, itemsFecha] of porFecha.entries()) {
+        const fechaBase = new Date(`${fecha}T00:00:00`);
+        const fechaPaso = fechaBase < new Date(ahora.toDateString() + 'T00:00:00');
+
+        if (fechaPaso) {
+          expirados.push(...itemsFecha);
+          continue;
+        }
+
+        let estado = null;
+        try {
+          estado = await horariosAPI.getEstadoDia(fecha);
+        } catch {
+          estado = null;
+        }
+
+        itemsFecha.forEach((item) => {
+          const hora = item.hora || '00:00';
+          const fechaHora = new Date(`${item.fecha}T${hora}:00`);
+          if (fechaHora <= ahora) {
+            expirados.push(item);
+            return;
+          }
+          if (!estado) return;
+          if (!estado.disponibles.includes(hora)) {
+            ocupados.push(item);
+          }
+        });
+      }
+
+      if (cancelado) return;
+
+      const removidosIds = new Set([
+        ...expirados.map((item) => item.id),
+        ...ocupados.map((item) => item.id),
+      ]);
+
+      if (removidosIds.size === 0) return;
+
+      removidosIds.forEach((id) => eliminarDelCarrito(id));
+
+      if (expirados.length > 0) {
+        const cantidad = expirados.length;
+        toast.info(`Se removio ${cantidad} turno${cantidad > 1 ? 's' : ''} porque la fecha/hora ya paso.`);
+      }
+      if (ocupados.length > 0) {
+        const cantidad = ocupados.length;
+        toast.error(`Se removio ${cantidad} turno${cantidad > 1 ? 's' : ''} porque el horario ya estaba ocupado.`);
+      }
+    };
+
+    limpiarItemsInvalidos();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [items, eliminarDelCarrito]);
+
   const withTimeout = (promise, ms, label = 'Operación') =>
     Promise.race([
       promise,
@@ -41,6 +118,7 @@ const Carrito = () => {
   // Botón para pagar con Mercado Pago
   const pagarConMercadoPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setProcesando(true);
     try {
       const pagoIdGlobal = 'MP' + Date.now() + Math.random().toString(36).substr(2, 9);
@@ -259,6 +337,7 @@ const Carrito = () => {
 
   const procesarPago = async () => {
     if (!user) { toast.error('Debes iniciar sesión para continuar'); navigate('/login'); return; }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setProcesando(true);
     try {
       const pagoIdGlobal = 'MP' + Date.now() + Math.random().toString(36).substr(2, 9);
