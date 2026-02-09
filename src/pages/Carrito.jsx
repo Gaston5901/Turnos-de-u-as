@@ -90,6 +90,10 @@ const Carrito = () => {
 
       removidosIds.forEach((id) => eliminarDelCarrito(id));
 
+      if (window.innerWidth <= 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
       if (expirados.length > 0) {
         const cantidad = expirados.length;
         toast.info(`Se removio ${cantidad} turno${cantidad > 1 ? 's' : ''} porque la fecha/hora ya paso.`);
