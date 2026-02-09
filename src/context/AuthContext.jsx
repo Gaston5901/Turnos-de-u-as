@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usuariosAPI, turnosAPI } from '../services/api';
 import { useCarritoStore } from '../store/useCarritoStore';
 import { toast } from 'react-toastify';
@@ -16,7 +17,10 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mpReconciling, setMpReconciling] = useState(false);
   const vaciarCarrito = useCarritoStore((state) => state.vaciarCarrito);
+  const navigate = useNavigate();
+  const mpIntervalRef = useRef(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -29,26 +33,77 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!user || (!user._id && !user.id)) return;
     const pagoIdPendiente = localStorage.getItem('mpPagoIdPendiente');
-    if (!pagoIdPendiente) return;
+    const turnosPendientesRaw = localStorage.getItem('mpTurnosPendientes');
+    let turnosPendientes = [];
 
-    const reconciliar = async () => {
-      try {
-        const turnos = await turnosAPI.getByUsuario(user._id || user.id);
-        const confirmado = Array.isArray(turnos) && turnos.some(
-          (turno) => turno.pagoId === pagoIdPendiente && turno.estado === 'confirmado'
-        );
-        if (confirmado) {
-          vaciarCarrito();
-          localStorage.removeItem('mpPagoIdPendiente');
-          toast.success('Pago confirmado. Turno guardado.');
-        }
-      } catch (error) {
-        // Sin accion: si falla, se reintenta cuando el usuario vuelva a abrir la app.
+    try {
+      turnosPendientes = turnosPendientesRaw ? JSON.parse(turnosPendientesRaw) : [];
+    } catch {
+      turnosPendientes = [];
+    }
+
+    if (!pagoIdPendiente && turnosPendientes.length === 0) return;
+
+    let cancelado = false;
+    let intentos = 0;
+    const maxIntentos = 8;
+    const intervalMs = 3000;
+
+    const limpiarIntervalo = () => {
+      if (mpIntervalRef.current) {
+        clearInterval(mpIntervalRef.current);
+        mpIntervalRef.current = null;
       }
     };
 
-    reconciliar();
-  }, [user, vaciarCarrito]);
+    const check = async () => {
+      if (cancelado) return;
+      intentos += 1;
+      try {
+        const turnos = await turnosAPI.getByUsuario(user._id || user.id);
+        const confirmadosIds = new Set(
+          (Array.isArray(turnos) ? turnos : [])
+            .filter((turno) => turno.estado === 'confirmado')
+            .map((turno) => String(turno.id || turno._id))
+        );
+        const confirmado = turnosPendientes.length > 0
+          ? turnosPendientes.every((id) => confirmadosIds.has(String(id)))
+          : Array.isArray(turnos) && turnos.some(
+            (turno) => turno.pagoId === pagoIdPendiente && turno.estado === 'confirmado'
+          );
+
+        if (confirmado) {
+          limpiarIntervalo();
+          localStorage.removeItem('mpPagoIdPendiente');
+          localStorage.removeItem('mpTurnosPendientes');
+          vaciarCarrito();
+          setMpReconciling(false);
+          if (window.location.pathname !== '/mis-turnos') {
+            navigate('/mis-turnos', { replace: true });
+          }
+          return;
+        }
+      } catch (error) {
+        // Sin accion: si falla, se reintenta en el proximo intento.
+      }
+
+      if (intentos >= maxIntentos) {
+        limpiarIntervalo();
+        setMpReconciling(false);
+      }
+    };
+
+    setMpReconciling(true);
+    check();
+    limpiarIntervalo();
+    mpIntervalRef.current = setInterval(check, intervalMs);
+
+    return () => {
+      cancelado = true;
+      limpiarIntervalo();
+      setMpReconciling(false);
+    };
+  }, [user, vaciarCarrito, navigate]);
 
   const login = async (email, password) => {
     try {
@@ -161,6 +216,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     isSuperAdmin,
     loading,
+    mpReconciling,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
