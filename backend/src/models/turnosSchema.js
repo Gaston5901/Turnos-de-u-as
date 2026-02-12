@@ -61,6 +61,20 @@ const turnoSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // --- Transferencia bancaria ---
+  comprobanteTransferencia: {
+    type: String, // Ruta o nombre de archivo
+    default: ''
+  },
+  estadoTransferencia: {
+    type: String,
+    enum: ['pendiente', 'aprobado', 'rechazado', ''],
+    default: ''
+  },
+  motivoRechazoTransferencia: {
+    type: String,
+    default: ''
+  },
   createdAt: {
     type: Date,
     default: Date.now

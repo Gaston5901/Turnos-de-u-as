@@ -16,9 +16,9 @@ const Footer = () => {
             <a href="https://www.instagram.com/nailsstudio_delfina" target="_blank" rel="noopener" className="social-link">
               <Instagram size={24} />
             </a>
-            <a href="#" className="social-link" title="Facebook (próximamente)">
+            {/* <a href="#" className="social-link" title="Facebook (próximamente)">
               <Facebook size={24} />
-            </a>
+            </a> */} 
           </div>
         </div>
 
@@ -29,7 +29,6 @@ const Footer = () => {
             <li><Link to="/servicios" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Servicios</Link></li>
             <li><Link to="/reservar" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Reservar Turno</Link></li>
             <li><Link to="/mis-turnos" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Mis Turnos</Link></li>
-            <li><Link to="/admin" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>Admin</Link></li>
           </ul>
         </div>
 
@@ -46,7 +45,7 @@ const Footer = () => {
             </li>
             <li>
               <MapPin size={18} />
-              <span>Barrio San Martín mza A casa 5</span>
+              <span>Barrio Los Olivos mza A casa 3   </span>
             </li>
           </ul>
         </div>
@@ -64,7 +63,7 @@ const Footer = () => {
       </div>
 
       <div className="footer-bottom">
-        <p>&copy; 2025 Delfina Nails Studio. Todos los derechos reservados.</p>
+        <p>&copy; 2026 Delfina Nails Studio. Todos los derechos reservados.</p>
       </div>
     </footer>
   );

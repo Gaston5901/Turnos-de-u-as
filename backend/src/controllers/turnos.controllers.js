@@ -1,3 +1,131 @@
+// Aprobar transferencia
+export const aprobarTransferencia = async (req, res) => {
+  try {
+    const turno = await TurnosModel.findById(req.params.id);
+    if (!turno) return res.status(404).json({ mensaje: 'Turno no encontrado' });
+    turno.estadoTransferencia = 'aprobado';
+    turno.motivoRechazoTransferencia = '';
+    turno.estado = 'confirmado';
+    await turno.save();
+    res.json({ mensaje: 'Transferencia aprobada', turno });
+  } catch (error) {
+    res.status(400).json({ mensaje: error.message });
+  }
+};
+
+// Rechazar transferencia
+export const rechazarTransferencia = async (req, res) => {
+  try {
+    const turno = await TurnosModel.findById(req.params.id);
+    if (!turno) return res.status(404).json({ mensaje: 'Turno no encontrado' });
+    turno.estadoTransferencia = 'rechazado';
+    turno.motivoRechazoTransferencia = req.body.motivo || '';
+    turno.estado = 'cancelado';
+    await turno.save();
+    res.json({ mensaje: 'Transferencia rechazada', turno });
+  } catch (error) {
+    res.status(400).json({ mensaje: error.message });
+  }
+};
+// Crear turno con comprobante de transferencia (POST /transferencia)
+export const crearTurnoTransferencia = async (req, res) => {
+  try {
+    // Datos del body y archivo
+    const { email, nombre, telefono, servicio, fecha, hora, comentario, montoTotal } = req.body;
+    const comprobanteFile = req.file;
+    if (!comprobanteFile) {
+      return res.status(400).json({ mensaje: 'Debe adjuntar un comprobante de transferencia.' });
+    }
+    // Buscar usuario por email (igual que crearTurno)
+    const emailNorm = String(email || '').toLowerCase().trim();
+    let usuarioDoc = await UsuariosModel.findOne({ email: emailNorm });
+    let usuarioId;
+    let passwordGenerada = null;
+    if (!usuarioDoc) {
+      let passwordToUse = req.body.passwordGenerada;
+      if (!passwordToUse) {
+        const crypto = await import('crypto');
+        passwordToUse = crypto.randomBytes(8).toString('hex');
+      }
+      passwordGenerada = passwordToUse;
+      const nuevoUsuario = new UsuariosModel({
+        nombre: nombre || '',
+        email: emailNorm,
+        username: emailNorm,
+        telefono: telefono || '',
+        password: passwordToUse,
+        rol: 'cliente',
+      });
+      await nuevoUsuario.save();
+      usuarioDoc = nuevoUsuario;
+      usuarioId = nuevoUsuario._id;
+    } else {
+      usuarioId = usuarioDoc._id;
+    }
+    // Validar horario (igual que crearTurno)
+    const ConfiguracionModel = (await import("../models/configuracionSchema.js")).default;
+    const config = await ConfiguracionModel.findOne();
+    const horariosPorDia = config?.horariosPorDia || {};
+    const day = new Date(fecha + 'T00:00:00').getDay();
+    let horaSolicitada = (hora || '').trim();
+    if (/^\d{1,2}:\d{1,2}$/.test(horaSolicitada)) {
+      const [hh, mm] = horaSolicitada.split(':');
+      horaSolicitada = hh.padStart(2, '0') + ':' + mm.padStart(2, '0');
+    }
+    const limpiarHora = h => {
+      let hora = String(h).trim();
+      if (/^\d{1,2}:\d{1,2}$/.test(hora)) {
+        const [hh, mm] = hora.split(':');
+        hora = hh.padStart(2, '0') + ':' + mm.padStart(2, '0');
+      }
+      return hora;
+    };
+    const normales = Array.isArray(horariosPorDia[String(day)]) ? horariosPorDia[String(day)] : [];
+    const extrasFecha = Array.isArray(horariosPorDia[fecha]) ? horariosPorDia[fecha] : [];
+    const horariosValidos = Array.from(new Set([...normales, ...extrasFecha].map(limpiarHora)));
+    if (!horariosValidos.includes(horaSolicitada)) {
+      return res.status(409).json({ mensaje: `El horario ${horaSolicitada} no está disponible para ese día.` });
+    }
+    // Comprobar solapado (igual que crearTurno)
+    const inicioDia = new Date(fecha + 'T00:00:00');
+    const finDia = new Date(fecha + 'T23:59:59');
+    const solapado = await TurnosModel.findOne({
+      usuario: usuarioId,
+      servicio,
+      fecha: { $gte: inicioDia, $lte: finDia },
+      hora: horaSolicitada,
+      estado: { $in: ["pendiente", "confirmado"] }
+    });
+    if (solapado) {
+      const objExist = solapado.toObject();
+      objExist.id = objExist._id;
+      delete objExist._id;
+      return res.status(200).json(objExist);
+    }
+    // Crear el turno con comprobante y estadoTransferencia
+    const turno = new TurnosModel({
+      usuario: usuarioId,
+      nombre: usuarioDoc.nombre || '',
+      telefono: usuarioDoc.telefono || '',
+      email: usuarioDoc.email || emailNorm || '',
+      servicio,
+      fecha,
+      hora: horaSolicitada,
+      comentario: comentario || '',
+      montoTotal: montoTotal || 0,
+      comprobanteTransferencia: comprobanteFile.filename,
+      estadoTransferencia: 'pendiente',
+    });
+    await turno.save();
+    const resp = turno.toObject();
+    resp.id = resp._id;
+    delete resp._id;
+    res.status(201).json(resp);
+    // (Opcional: enviar email de recepción de comprobante)
+  } catch (error) {
+    res.status(400).json({ mensaje: error.message });
+  }
+};
 // Marcar seña como devuelta
 export const devolverSenia = async (req, res) => {
   try {

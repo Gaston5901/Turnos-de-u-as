@@ -220,3 +220,29 @@ img {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.swal2-container {
+  z-index: 40000 !important;
+}
+
+.swal2-toast-fino {
+  min-width: 140px !important;
+  max-width: 90vw !important;
+  padding: 10px 14px !important;
+  font-size: 15px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px #e91e6322 !important;
+  background: #fff !important;
+  color: #e91e63 !important;
+  border: 1.5px solid #e91e63 !important;
+  text-align: center !important;
+}
+
+@media (max-width: 600px) {
+  .swal2-toast-fino {
+    min-width: 0 !important;
+    max-width: 96vw !important;
+    font-size: 14px !important;
+    padding: 10px 6vw !important;
+  }
+}

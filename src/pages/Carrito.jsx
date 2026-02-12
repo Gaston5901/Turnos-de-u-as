@@ -8,6 +8,7 @@ import { ShoppingCart, Trash2, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import './Carrito.css';
+import PagarConTransferenciaBtn from '../components/Carrito/PagarConTransferenciaBtn';
 
 const Carrito = () => {
   const navigate = useNavigate();
@@ -476,9 +477,10 @@ const Carrito = () => {
               <button className="btn btn-primary btn-pagar" onClick={procesarPago} disabled={procesando}>
                 {procesando ? (<><div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>Procesando...</>) : (<><CreditCard size={20} />Pagar (prueba local)</>)}
               </button>
-              <button className="btn btn-secondary btn-pagar" style={{marginTop:8}} onClick={pagarConMercadoPago} disabled={procesando}>
+              {/* <button className="btn btn-secondary btn-pagar" style={{marginTop:8}} onClick={pagarConMercadoPago} disabled={procesando}>
                 {procesando ? (<><div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>Procesando...</>) : (<><CreditCard size={20} />Pagar con Mercado Pago</>)}
-              </button>
+              </button> */}
+              <PagarConTransferenciaBtn />
               <button className="btn btn-secondary mt-2" onClick={() => navigate('/reservar')}>Agregar más servicios</button>
             </div>
           </div>

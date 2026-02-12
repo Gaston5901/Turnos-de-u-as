@@ -5,6 +5,7 @@ import { useCarrito } from '../../store/useCarritoStore';
 import { Menu, X, ShoppingCart, User, LogOut, LayoutDashboard, Calendar, TrendingUp, FileText, Image as ImageIcon } from 'lucide-react';
 import './Navbar.css';
 import './NavbarAdmin.css';
+import BadgeTurnosEnProceso from '../Admin/BadgeTurnosEnProceso';
 
 const Navbar = () => {
 
