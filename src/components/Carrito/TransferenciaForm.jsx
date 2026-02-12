@@ -50,18 +50,22 @@ const TransferenciaForm = () => {
     setEnviando(true);
     try {
       const formData = new FormData();
-      formData.append('nombreTitular', nombreTitular);
+      // Tomar el primer item del carrito (solo se permite uno por reserva)
+      const primerItem = items[0] || {};
+      formData.append('nombre', nombreTitular);
       formData.append('metodo', metodo);
       formData.append('comprobante', comprobante);
-      formData.append('servicio', servicioSeleccionado?.nombre || '');
-      formData.append('fecha', fechaSeleccionada);
-      formData.append('hora', horaSeleccionada);
-      formData.append('usuario', user?.nombre || '');
+      formData.append('servicio', primerItem.servicio?._id || primerItem.servicio?.id || '');
+      formData.append('fecha', primerItem.fecha || '');
+      formData.append('hora', primerItem.hora || '');
       formData.append('email', user?.email || '');
-      formData.append('monto', total);
-      // Aquí puedes agregar más campos según tu modelo
+      formData.append('montoTotal', primerItem.servicio?.precio || 0);
+      // Estado inicial: pendiente
+      formData.append('estadoTransferencia', 'pendiente');
       await axios.post('/api/turnos/transferencia', formData);
-      limpiarCarrito();
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem('carrito-storage');
+      }
       navigate('/mis-turnos?solicitud=ok');
     } catch (err) {
       Swal.fire({
