@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import axios from 'axios';
+import api from '../../services/api';
 import TurnosTransferenciaModal from './TurnosTransferenciaModal';
 
 const FabTurnosTransferencia = () => {
@@ -11,7 +11,7 @@ const FabTurnosTransferencia = () => {
   useEffect(() => {
     const fetchCount = async () => {
       try {
-        const res = await axios.get('/api/turnos/en-proceso/count');
+        const res = await api.get('/turnos/en-proceso/count');
         setCount(res.data.count);
       } catch {
         setCount(0);

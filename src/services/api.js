@@ -15,6 +15,10 @@ api.interceptors.request.use((config) => {
   if (user && user.token) {
     config.headers.Authorization = `Bearer ${user.token}`;
   }
+  // No agregar Content-Type si es FormData
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
   return config;
 });
 
@@ -87,7 +91,15 @@ export const horariosAPI = {
       const [bh, bm] = b.split(':').map(Number);
       return ah !== bh ? ah - bh : am - bm;
     });
-    const ocupados = turnos.map(t => t.hora);
+    // Considerar ocupados:
+    // - Todos los turnos 'pendiente', 'confirmado', 'en_proceso' (excepto los 'en_proceso' rechazados)
+    // - Si el turno está 'en_proceso', bloquear el horario hasta que se confirme o rechace
+    const ocupados = turnos
+      .filter(t => (
+        (["pendiente", "confirmado"].includes(t.estado) && t.estadoTransferencia !== 'rechazado') ||
+        (t.estado === 'en_proceso' && t.estadoTransferencia !== 'rechazado')
+      ))
+      .map(t => t.hora);
     const disponibles = todos.filter(h => !ocupados.includes(h));
     return { dia: day, todos, ocupados, disponibles };
   }

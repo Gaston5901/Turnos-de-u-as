@@ -29,8 +29,6 @@ const MisTurnos = () => {
       setLoading(true);
       try {
         const turnosRes = await turnosAPI.getByUsuario(user._id || user.id);
-        // Log clave: respuesta cruda de la API de turnos
-        console.log('[MisTurnos] Respuesta cruda turnosAPI.getByUsuario:', turnosRes);
         if (!cancelado) setTurnos(turnosRes || []);
       } catch (err) {
         if (!cancelado) setTurnos([]);
@@ -101,28 +99,34 @@ const MisTurnos = () => {
                       // Badge minimalista igual a historial
                       let badge = '';
                       let badgeClass = 'turno-badge';
-                      switch (turno.estado) {
-                        case 'cancelado':
-                          badge = 'cancelado';
-                          badgeClass += ' cancelado';
-                          break;
-                        case 'devuelto':
-                          badge = 'devuelto';
-                          badgeClass += ' devuelto';
-                          break;
-                        case 'confirmado':
-                          badge = 'confirmado';
-                          badgeClass += ' confirmado';
-                          break;
-                        case 'expirado':
-                          badge = 'expirado';
-                          badgeClass += ' expirado';
-                          break;
-                        case 'completado':
-                        default:
-                          badge = 'completado';
-                          badgeClass += ' completado';
-                          break;
+                      // Mostrar badge 'rechazado' si corresponde
+                      if (turno.estado === 'cancelado' || turno.estadoTransferencia === 'rechazado') {
+                        badge = 'rechazado';
+                        badgeClass += ' rechazado-violeta';
+                      } else {
+                        switch (turno.estado) {
+                          case 'en_proceso':
+                            badge = 'en proceso';
+                            badgeClass += ' en-proceso';
+                            break;
+                          case 'devuelto':
+                            badge = 'devuelto';
+                            badgeClass += ' devuelto';
+                            break;
+                          case 'confirmado':
+                            badge = 'confirmado';
+                            badgeClass += ' confirmado';
+                            break;
+                          case 'expirado':
+                            badge = 'expirado';
+                            badgeClass += ' expirado';
+                            break;
+                          case 'completado':
+                          default:
+                            badge = 'completado';
+                            badgeClass += ' completado';
+                            break;
+                        }
                       }
                       const keyTurno = turno.id || turno._id || idx;
                       const fechaTurno = new Date(turno.fecha + 'T' + (turno.hora || '00:00'));
@@ -131,7 +135,11 @@ const MisTurnos = () => {
                       const puedeCancelar = turno.estado === 'confirmado' && diffHoras > 48;
                       return (
                         <div key={keyTurno} className="turno-card">
-                          <div className={badgeClass}>{badge}</div>
+                          <div className={badgeClass}>
+                            {turno.estado === 'en_proceso' ? (
+                              <span style={{ color: '#ff9800', fontWeight: 'bold' }}>{badge}</span>
+                            ) : badge}
+                          </div>
                           <h3>{nombreServicio}</h3>
                           <div className="turno-info">
                             <div className="info-item">
@@ -153,6 +161,8 @@ const MisTurnos = () => {
                               <strong>${turno.montoTotal && turno.montoPagado != null ? (turno.montoTotal - turno.montoPagado).toLocaleString() : '-'}</strong>
                             </div>
                           </div>
+                          {/* Si el turno está rechazado, solo mostrar el badge, sin botón */}
+                          {null}
                           {puedeCancelar && (
                             <div className="turno-footer" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                               <button

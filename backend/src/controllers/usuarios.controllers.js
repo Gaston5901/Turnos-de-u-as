@@ -37,7 +37,8 @@ export const crearUsuario = async (req, res) => {
     // Verificar si el usuario ya existe
     const usuarioExistente = await UsuariosModel.findOne({ email: emailNorm });
     if (usuarioExistente) {
-      return res.status(400).json({ mensaje: "El email ya está registrado" });
+      // Si ya existe, devolver el usuario existente en vez de error
+      return res.status(200).json({ usuario: sanitizeUsuario(usuarioExistente), mensaje: "Usuario ya registrado" });
     }
 
     const nuevoUsuario = new UsuariosModel({

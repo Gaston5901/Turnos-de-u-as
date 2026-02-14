@@ -305,6 +305,11 @@
   background: #fff3e0;
   color: #f57c00;
 }
+.turno-badge.rechazado-violeta {
+  background: #ede7f6;
+  color: #7c4dff;
+  border: 1.5px solid #7c4dff;
+}
 
 @media (max-width: 768px) {
   .mis-turnos-header,

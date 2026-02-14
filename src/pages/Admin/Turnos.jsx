@@ -250,6 +250,8 @@ const Turnos = () => {
   // Declaraciones fuera de cualquier función/render
   const hoyStr = format(new Date(), 'yyyy-MM-dd');
   const turnosFiltrados = turnos.filter((turno) => {
+    // Filtrar turnos rechazados
+    if (turno.estado === 'rechazado') return false;
     let esValido = false;
     if (filtro === 'todos') {
       esValido = turno.fecha >= hoyStr && turno.estado !== 'completado';

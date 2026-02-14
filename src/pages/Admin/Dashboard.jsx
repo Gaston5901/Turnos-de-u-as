@@ -39,9 +39,9 @@ const Dashboard = () => {
       const inicioMes = format(startOfMonth(new Date()), 'yyyy-MM-dd');
       const finMes = format(endOfMonth(new Date()), 'yyyy-MM-dd');
 
-      const turnosDelDia = turnosRes.data.filter((t) => t.fecha === hoy);
+      const turnosDelDia = turnosRes.data.filter((t) => t.fecha === hoy && t.estado !== 'en_proceso');
       const turnosDelMes = turnosRes.data.filter(
-        (t) => t.fecha >= inicioMes && t.fecha <= finMes
+        (t) => t.fecha >= inicioMes && t.fecha <= finMes && t.estado !== 'en_proceso'
       );
 
       // Clientes nuevos este mes

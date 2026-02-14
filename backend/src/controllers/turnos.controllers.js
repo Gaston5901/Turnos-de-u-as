@@ -1,12 +1,46 @@
+// Obtener turnos en proceso (para admin confirmar/rechazar transferencia)
+export const obtenerTurnosEnProceso = async (req, res) => {
+  try {
+    // Traer todos los turnos en estado en_proceso (sin filtrar por transferencia ni presencial)
+    const turnos = await TurnosModel.find({ estado: 'en_proceso' }).populate('usuario servicio');
+    res.json(turnos);
+  } catch (error) {
+    res.status(500).json({ mensaje: error.message });
+  }
+};
+
 // Aprobar transferencia
 export const aprobarTransferencia = async (req, res) => {
   try {
-    const turno = await TurnosModel.findById(req.params.id);
+    const turno = await TurnosModel.findById(req.params.id).populate('servicio usuario');
     if (!turno) return res.status(404).json({ mensaje: 'Turno no encontrado' });
     turno.estadoTransferencia = 'aprobado';
     turno.motivoRechazoTransferencia = '';
     turno.estado = 'confirmado';
+    // Guardar la seña como montoPagado (mitad del montoTotal)
+    turno.montoPagado = Math.round((turno.montoTotal / 2) * 100) / 100;
     await turno.save();
+
+    // Enviar mail de comprobante
+    try {
+      const { enviarComprobanteTurno } = await import('../helpers/emailSender.cjs');
+      const servicioObj = turno.servicio && turno.servicio.nombre ? turno.servicio : await (await import('../models/serviciosSchema.js')).default.findById(turno.servicio);
+      await enviarComprobanteTurno({
+        to: turno.email,
+        nombre: turno.nombre,
+        servicios: [{ title: servicioObj.nombre, unit_price: servicioObj.precio }],
+        seña: turno.montoPagado,
+        total: turno.montoTotal,
+        pagoId: turno._id,
+        fecha: turno.fecha.toISOString().slice(0,10),
+        hora: turno.hora,
+        extras: undefined,
+        restoAPagar: turno.montoTotal - turno.montoPagado
+      });
+    } catch (mailErr) {
+      console.error('Error enviando mail de comprobante:', mailErr);
+    }
+
     res.json({ mensaje: 'Transferencia aprobada', turno });
   } catch (error) {
     res.status(400).json({ mensaje: error.message });
@@ -19,8 +53,10 @@ export const rechazarTransferencia = async (req, res) => {
     const turno = await TurnosModel.findById(req.params.id);
     if (!turno) return res.status(404).json({ mensaje: 'Turno no encontrado' });
     turno.estadoTransferencia = 'rechazado';
-    turno.motivoRechazoTransferencia = req.body.motivo || '';
-    turno.estado = 'cancelado';
+    turno.motivoRechazoTransferencia = (req.body && req.body.motivo) ? req.body.motivo : '';
+    if (turno.estado === 'en_proceso') {
+      turno.estado = 'rechazado';
+    }
     await turno.save();
     res.json({ mensaje: 'Transferencia rechazada', turno });
   } catch (error) {
@@ -30,10 +66,13 @@ export const rechazarTransferencia = async (req, res) => {
 // Crear turno con comprobante de transferencia (POST /transferencia)
 export const crearTurnoTransferencia = async (req, res) => {
   try {
+    console.log('BODY recibido:', req.body);
+    console.log('FILE recibido:', req.file);
     // Datos del body y archivo
     const { email, nombre, telefono, servicio, fecha, hora, comentario, montoTotal } = req.body;
     const comprobanteFile = req.file;
     if (!comprobanteFile) {
+      console.log('FALTA comprobante');
       return res.status(400).json({ mensaje: 'Debe adjuntar un comprobante de transferencia.' });
     }
     // Buscar usuario por email (igual que crearTurno)
@@ -42,6 +81,7 @@ export const crearTurnoTransferencia = async (req, res) => {
     let usuarioId;
     let passwordGenerada = null;
     if (!usuarioDoc) {
+      // Permitir que el admin pase una contraseña generada (por ejemplo, "temporal123")
       let passwordToUse = req.body.passwordGenerada;
       if (!passwordToUse) {
         const crypto = await import('crypto');
@@ -84,6 +124,7 @@ export const crearTurnoTransferencia = async (req, res) => {
     const extrasFecha = Array.isArray(horariosPorDia[fecha]) ? horariosPorDia[fecha] : [];
     const horariosValidos = Array.from(new Set([...normales, ...extrasFecha].map(limpiarHora)));
     if (!horariosValidos.includes(horaSolicitada)) {
+      console.log('HORARIO NO DISPONIBLE:', horaSolicitada, horariosValidos);
       return res.status(409).json({ mensaje: `El horario ${horaSolicitada} no está disponible para ese día.` });
     }
     // Comprobar solapado (igual que crearTurno)
@@ -100,13 +141,14 @@ export const crearTurnoTransferencia = async (req, res) => {
       const objExist = solapado.toObject();
       objExist.id = objExist._id;
       delete objExist._id;
+      console.log('TURNO SOLAPADO:', objExist);
       return res.status(200).json(objExist);
     }
     // Crear el turno con comprobante y estadoTransferencia
     const turno = new TurnosModel({
       usuario: usuarioId,
-      nombre: usuarioDoc.nombre || '',
-      telefono: usuarioDoc.telefono || '',
+      nombre: usuarioDoc.nombre || nombre || '',
+      telefono: usuarioDoc.telefono || telefono || '',
       email: usuarioDoc.email || emailNorm || '',
       servicio,
       fecha,
@@ -115,14 +157,20 @@ export const crearTurnoTransferencia = async (req, res) => {
       montoTotal: montoTotal || 0,
       comprobanteTransferencia: comprobanteFile.filename,
       estadoTransferencia: 'pendiente',
+      metodoPago: 'transferencia',
+      estado: 'en_proceso',
+      titularTransferencia: req.body.titularTransferencia || '',
+      metodoTransferencia: req.body.metodoTransferencia || '',
     });
     await turno.save();
     const resp = turno.toObject();
     resp.id = resp._id;
     delete resp._id;
+    console.log('TURNO CREADO:', resp);
     res.status(201).json(resp);
     // (Opcional: enviar email de recepción de comprobante)
   } catch (error) {
+    console.log('ERROR crearTurnoTransferencia:', error);
     res.status(400).json({ mensaje: error.message });
   }
 };
@@ -286,8 +334,8 @@ export const crearTurno = async (req, res) => {
     const turno = new TurnosModel({
       ...req.body,
       usuario: usuarioId,
-      nombre: usuarioDoc.nombre || '',
-      telefono: usuarioDoc.telefono || '',
+      nombre: usuarioDoc.nombre || nombre || '',
+      telefono: usuarioDoc.telefono || telefono || '',
       email: usuarioDoc.email || emailNorm || '',
     });
     await turno.save();
@@ -460,6 +508,8 @@ export const obtenerTurnosPorUsuario = async (req, res) => {
       obj.hora = obj.hora || '';
       obj.montoPagado = obj.montoPagado || 0;
       obj.pagoId = obj.pagoId || obj.id;
+      obj.titularTransferencia = obj.titularTransferencia || '';
+      obj.metodoTransferencia = obj.metodoTransferencia || '';
       return obj;
     });
     res.json(turnosMap);

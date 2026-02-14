@@ -16,7 +16,11 @@ function ModalTurnoDetalle({ turno, usuario, servicio, onClose }) {
     // Si el estado es 'completado' pero registroEstadistica es 'seña' y la fecha ya pasó, mostrar como 'expirado'
     const fechaTurno = new Date(turno.fecha + 'T' + (turno.hora || '00:00') + ':00');
     const ahora = new Date();
-    if (turno.estado === 'devuelto' && turno.seniaDevuelta) {
+    if (turno.estado === 'rechazado') {
+      estadoLabel = 'rechazado';
+      estadoColor = '#a020f0'; // violeta
+      infoDinero = 'Este turno fue rechazado por el administrador. El cliente puede reservar nuevamente este horario.';
+    } else if (turno.estado === 'devuelto' && turno.seniaDevuelta) {
       // Si es seña devuelta, registroEstadistica es 'seña' o 'ninguno' y la fecha ya pasó, es expirado
       if ((turno.registroEstadistica === 'seña' || turno.registroEstadistica === 'ninguno') && fechaTurno < ahora) {
         estadoLabel = 'expirado';
@@ -162,7 +166,7 @@ function ModalTurnoDetalle({ turno, usuario, servicio, onClose }) {
 
           <div><b>Resta:</b> <span style={{ color: '#ff9800' }}>${(turno.montoTotal - turno.montoPagado).toLocaleString()}</span></div>
           {infoDinero && (
-            <div style={{margin:'6px 0 0 0',fontSize:14,color:'#ad1457',fontWeight:500}}>{infoDinero}</div>
+            <div style={{margin:'6px 0 0 0',fontSize:14,color:'#a020f0',fontWeight:500}}>{infoDinero}</div>
           )}
 
           <hr style={{ border: 'none', height: 1, background: 'linear-gradient(to right, transparent, #d13fa0, transparent)', margin: '14px 0' }} />
@@ -319,9 +323,14 @@ const Historial = () => {
           // Badge simple para estado principal
           let estadoLabel = turno.estado;
           let estadoColor = '#1e7e34';
+          let infoDinero = '';
           const fechaTurno = new Date(turno.fecha + 'T' + (turno.hora || '00:00') + ':00');
           const ahora = new Date();
-          if (turno.estado === 'devuelto' && turno.seniaDevuelta) {
+          if (turno.estado === 'rechazado') {
+            estadoLabel = 'rechazado';
+            estadoColor = '#a020f0'; // violeta
+            infoDinero = 'Este turno fue rechazado por el administrador. El cliente puede reservar nuevamente este horario.';
+          } else if (turno.estado === 'devuelto' && turno.seniaDevuelta) {
             // Si es seña devuelta, registroEstadistica es 'seña' o 'ninguno' y la fecha ya pasó, es expirado
             if ((turno.registroEstadistica === 'seña' || turno.registroEstadistica === 'ninguno') && fechaTurno < ahora) {
               estadoLabel = 'expirado';

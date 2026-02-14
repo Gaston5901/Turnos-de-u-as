@@ -20,11 +20,11 @@ const turnoSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  estado: {
-    type: String,
-    enum: ["pendiente", "confirmado", "cancelado", "realizado", "completado"],
-    default: "pendiente"
-  },
+    estado: {
+      type: String,
+      enum: ["pendiente", "en_proceso", "confirmado", "cancelado", "realizado", "completado", "rechazado"],
+      default: "pendiente"
+    },
   pagoId: {
     type: String,
     default: ''
@@ -72,6 +72,14 @@ const turnoSchema = new mongoose.Schema({
     default: ''
   },
   motivoRechazoTransferencia: {
+    type: String,
+    default: ''
+  },
+  titularTransferencia: {
+    type: String,
+    default: ''
+  },
+  metodoTransferencia: {
     type: String,
     default: ''
   },

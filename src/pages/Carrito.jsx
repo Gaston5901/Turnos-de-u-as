@@ -449,13 +449,13 @@ const Carrito = () => {
             {items.map((item) => (
               <div key={item.id} className="carrito-item">
                 <div className="item-info">
-                  <h3>{item.servicio.nombre}</h3>
+                  <h3>{item.servicio?.nombre || ''}</h3>
                   <p className="item-fecha">📅 {format(new Date(item.fecha + 'T00:00:00'), 'dd/MM/yyyy')} - 🕐 {item.hora} hs</p>
-                  <p className="item-duracion">⏱️ Duración: {item.servicio.duracion} minutos</p>
+                  <p className="item-duracion">⏱️ Duración: {item.servicio?.duracion || 0} minutos</p>
                 </div>
                 <div className="item-precio">
-                  <div className="precio-total"><span className="label">Precio total:</span><span className="valor">${item.servicio.precio.toLocaleString()}</span></div>
-                  <div className="precio-seña"><span className="label">Seña (50%):</span><span className="valor">${(item.servicio.precio / 2).toLocaleString()}</span></div>
+                  <div className="precio-total"><span className="label">Precio total:</span><span className="valor">${(item.servicio?.precio || 0).toLocaleString()}</span></div>
+                  <div className="precio-seña"><span className="label">Seña (50%):</span><span className="valor">${((item.servicio?.precio || 0) / 2).toLocaleString()}</span></div>
                 </div>
                 <button className="btn-eliminar" onClick={() => eliminarDelCarrito(item.id)} title="Eliminar"><Trash2 size={20} /></button>
               </div>

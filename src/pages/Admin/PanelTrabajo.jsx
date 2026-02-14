@@ -92,10 +92,10 @@ const PanelTrabajo = () => {
       setServicios(serviciosMap); setUsuarios(usuariosMap);
 
       const todos = turnosRes.data;
-      setTurnosHoy(todos.filter(t => t.fecha === hoyStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado').sort((a,b)=>a.hora.localeCompare(b.hora)));
-      setTurnosManana(todos.filter(t => t.fecha === mananaStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado').sort((a,b)=>a.hora.localeCompare(b.hora)));
-      setTurnosExpirados(todos.filter(t => t.fecha < hoyStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado').sort((a,b)=>a.fecha.localeCompare(b.fecha)));
-      setTurnosCancelados(todos.filter(t => t.estado === 'cancelado').sort((a,b)=>a.fecha.localeCompare(b.fecha)));
+      setTurnosHoy(todos.filter(t => t.fecha === hoyStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado' && t.estado !== 'en_proceso').sort((a,b)=>a.hora.localeCompare(b.hora)));
+      setTurnosManana(todos.filter(t => t.fecha === mananaStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado' && t.estado !== 'en_proceso').sort((a,b)=>a.hora.localeCompare(b.hora)));
+      setTurnosExpirados(todos.filter(t => t.fecha < hoyStr && t.estado !== 'completado' && t.estado !== 'devuelto' && t.estado !== 'cancelado' && t.estado !== 'en_proceso').sort((a,b)=>a.fecha.localeCompare(b.fecha)));
+      setTurnosCancelados(todos.filter(t => t.estado === 'cancelado' && t.estado !== 'en_proceso').sort((a,b)=>a.fecha.localeCompare(b.fecha)));
     } catch (e) {
       console.error(e);
     } finally { setLoading(false); }

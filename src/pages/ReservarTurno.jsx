@@ -93,14 +93,21 @@ const ReservarTurno = () => {
       // Usar el servicio turnosAPI para obtener los turnos
       const turnosResp = await import('../services/api').then(mod => mod.turnosAPI.getAll());
       const turnos = turnosResp.data || [];
+      // Bloquear horarios de turnos en_proceso, pendiente y confirmado (excepto rechazados)
       const ocupados = turnos
-      .filter(t => t.fecha === fecha && ["pendiente", "confirmado"].includes(t.estado))
-      .map(t => t.hora);
+        .filter(t => t.fecha === fecha && (
+          (["pendiente", "confirmado"].includes(t.estado) && t.estadoTransferencia !== 'rechazado') ||
+          (t.estado === 'en_proceso' && t.estadoTransferencia !== 'rechazado')
+        ))
+        .map(t => t.hora);
 
       setEstadoHorarios({
         todos,
         ocupados,
-        disponibles: todos.filter(h => !ocupados.includes(h))
+        disponibles: todos.filter(h => !ocupados.includes(h)),
+        turnos: turnos.filter(t => t.fecha === fecha && (
+          (["pendiente", "confirmado", "en_proceso"].includes(t.estado) && t.estadoTransferencia !== 'rechazado')
+        ))
       });
     } catch (error) {
       console.error('Error al cargar horarios:', error);
@@ -385,18 +392,32 @@ const ReservarTurno = () => {
               <>
                 <div className="horarios-grid">
                   {estadoHorarios.todos.map((hora) => {
-                    const ocupado = estadoHorarios.ocupados.includes(hora);
-
+                    // Buscar el turno que ocupa ese horario
+                    const turnoOcupado = (estadoHorarios.turnos || []).find(t => t.hora === hora);
+                    let badge = null;
+                    let ocupado = false;
+                    let enproceso = false;
+                    if (turnoOcupado) {
+                      if (["pendiente", "confirmado"].includes(turnoOcupado.estado) && turnoOcupado.estadoTransferencia !== 'rechazado') {
+                        badge = <span className="tag-reservado">Reservado</span>;
+                        ocupado = true;
+                      } else if (turnoOcupado.estado === 'en_proceso' && turnoOcupado.estadoTransferencia !== 'rechazado') {
+                        badge = <span className="tag-enproceso">En proceso</span>;
+                        ocupado = true;
+                        enproceso = true;
+                      }
+                    }
                     return (
                       <div
                         key={hora}
-                        className={`hora-card ${horaSeleccionada === hora ? 'selected' : ''} ${
-                          ocupado ? 'ocupado' : ''
-                        }`}
-                        onClick={() => seleccionarHora(hora, ocupado)}
+                        className={`hora-card ${horaSeleccionada === hora ? 'selected' : ''} ${ocupado ? 'ocupado' : ''} ${enproceso ? 'enproceso' : ''}`}
+                        onClick={ocupado ? undefined : () => seleccionarHora(hora, false)}
+                        style={ocupado ? { pointerEvents: 'none', cursor: 'not-allowed', opacity: 1 } : {}}
+                        aria-disabled={ocupado}
+                        tabIndex={ocupado ? -1 : 0}
                       >
                         <Clock size={20} />
-                        {hora} hs {ocupado && <span className="tag-reservado">Reservado</span>}
+                        <span className={ocupado ? 'hora-text' : ''}>{hora} hs</span> {badge}
                       </div>
                     );
                   })}

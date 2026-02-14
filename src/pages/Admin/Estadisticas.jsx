@@ -172,10 +172,10 @@ const Estadisticas = () => {
         fechaFinDate = new Date(anio, 11, endOfYear(new Date(anio, 0, 1)).getDate());
       }
 
-      // Excluir turnos con seña devuelta
+      // Excluir turnos con seña devuelta y en_proceso
       const turnosFiltrados = turnos.filter(t => {
         const fechaTurno = new Date(t.fecha);
-        return fechaTurno >= fechaInicioDate && fechaTurno <= fechaFinDate && !t.seniaDevuelta;
+        return fechaTurno >= fechaInicioDate && fechaTurno <= fechaFinDate && !t.seniaDevuelta && t.estado !== 'en_proceso';
       });
 
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../../store/useCarritoStore';
+import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../services/api';
 import { FaRegCopy } from 'react-icons/fa6';
 import { FaCircle } from 'react-icons/fa';
 import { FaArrowRight } from 'react-icons/fa';
@@ -14,7 +15,7 @@ const aliasList = [
 ];
 
 const TransferenciaForm = () => {
-  const { items, calcularTotal } = useCarrito();
+  const { items, calcularTotal, vaciarCarrito } = useCarrito();
   const { user } = useAuth();
   const [nombreTitular, setNombreTitular] = useState('');
   const [metodo, setMetodo] = useState('');
@@ -52,21 +53,38 @@ const TransferenciaForm = () => {
       const formData = new FormData();
       // Tomar el primer item del carrito (solo se permite uno por reserva)
       const primerItem = items[0] || {};
-      formData.append('nombre', nombreTitular);
-      formData.append('metodo', metodo);
+      formData.append('titularTransferencia', nombreTitular);
+      formData.append('metodoTransferencia', metodo);
       formData.append('comprobante', comprobante);
-      formData.append('servicio', primerItem.servicio?._id || primerItem.servicio?.id || '');
+      // Si el item tiene servicioId, usarlo; si no, buscar el _id o id
+      // Enviar siempre el ID del servicio
+      formData.append('servicio', primerItem.servicioId || primerItem.servicio?._id || primerItem.servicio?.id || '');
+      formData.append('metodoPago', 'transferencia');
+      formData.append('estadoTransferencia', 'pendiente');
       formData.append('fecha', primerItem.fecha || '');
       formData.append('hora', primerItem.hora || '');
       formData.append('email', user?.email || '');
       formData.append('montoTotal', primerItem.servicio?.precio || 0);
       // Estado inicial: pendiente
       formData.append('estadoTransferencia', 'pendiente');
-      await axios.post('/api/turnos/transferencia', formData);
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.removeItem('carrito-storage');
-      }
-      navigate('/mis-turnos?solicitud=ok');
+      await api.post('/turnos/transferencia', formData, {
+        headers: undefined // No headers manuales, axios detecta FormData
+      });
+      vaciarCarrito();
+      toast.success('¡Turno solicitado! Esperá la confirmación por email.', {
+        position: 'top-center',
+        autoClose: 3500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+      });
+      setTimeout(() => {
+        navigate('/mis-turnos');
+        setTimeout(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 100);
+      }, 400);
     } catch (err) {
       Swal.fire({
         icon: 'error',
