@@ -128,8 +128,27 @@ const TurnosTransferenciaModal = ({ onClose, onReady }) => {
         ) : <>
         <h2 style={{marginBottom:24, color:'#e91e63', fontWeight:700, fontSize:28, textAlign:'center'}}>Turnos a confirmar <span style={{fontWeight:400, fontSize:20}}>(Transferencia)</span></h2>
         {error && <div>{error}</div>}
-        <div style={{width:'100%',overflowX:'auto'}}>
-          <table style={{width:'100%',minWidth:900,fontSize:16,background:'#fff',borderRadius:12,boxShadow:'0 2px 8px #e91e6322',borderCollapse:'collapse'}}>
+        <div
+          style={{
+            width: '100%',
+            overflowX: 'auto',
+            maxWidth: '100vw',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          <table
+            style={{
+              width: '100%',
+              minWidth: 320,
+              maxWidth: 900,
+              fontSize: 16,
+              background: '#fff',
+              borderRadius: 12,
+              boxShadow: '0 2px 8px #e91e6322',
+              borderCollapse: 'collapse',
+              margin: '0 auto',
+            }}
+          >
             <thead>
               <tr style={{background:'#fce4ec',color:'#e91e63'}}>
                 <th style={{padding:'10px 8px',fontWeight:700}}>Cliente</th>
@@ -146,14 +165,68 @@ const TurnosTransferenciaModal = ({ onClose, onReady }) => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="9" style={{textAlign:'center',padding:20}}>
-                    <div className="spinner" style={{border:'4px solid #eee',borderTop:'4px solid #e91e63',borderRadius:'50%',width:32,height:32,display:'inline-block',animation:'spin 1s linear infinite',verticalAlign:'middle'}}></div>
-                    <style>{`@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}`}</style>
-                    <div style={{marginTop:8, color:'#e91e63', fontWeight:600, fontSize:18}}>Cargando...</div>
+                  <td colSpan="9" style={{padding: 20}}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: window.innerWidth <= 600 ? 'flex-start' : 'center',
+                        justifyContent: 'center',
+                        minWidth: 200,
+                        width: '100%',
+                      }}
+                    >
+                      <div
+                        className="spinner"
+                        style={{
+                          border: '4px solid #eee',
+                          borderTop: '4px solid #e91e63',
+                          borderRadius: '50%',
+                          width: 32,
+                          height: 32,
+                          display: 'inline-block',
+                          animation: 'spin 1s linear infinite',
+                          verticalAlign: 'middle',
+                          margin: window.innerWidth <= 600 ? '0 0 0 0' : '0 auto',
+                        }}
+                      ></div>
+                      <style>{`@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}`}</style>
+                      <div
+                        style={{
+                          marginTop: 8,
+                          color: '#e91e63',
+                          fontWeight: 600,
+                          fontSize: 18,
+                          textAlign: window.innerWidth <= 600 ? 'left' : 'center',
+                          width: '100%',
+                        }}
+                      >
+                        Cargando...
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ) : turnos.length === 0 ? (
-                <tr><td colSpan="9" style={{textAlign:'center',padding:20}}>No hay turnos pendientes</td></tr>
+                <tr>
+                  <td colSpan="9" style={{padding:20}}>
+                    <div
+                      style={{
+                        color:'#e91e63',
+                        fontWeight:600,
+                        fontSize:18,
+                        textAlign:'left',
+                        minWidth:200,
+                        width:'100%',
+                        paddingLeft:4,
+                        boxSizing:'border-box',
+                        whiteSpace:'normal',
+                        wordBreak:'break-word',
+                      }}
+                    >
+                      No hay turnos pendientes
+                    </div>
+                  </td>
+                </tr>
               ) : (
                 turnos.map(turno => {
                     const url = turno.comprobanteTransferencia
