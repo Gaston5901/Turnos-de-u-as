@@ -122,7 +122,9 @@ const TurnosTransferenciaModal = ({ onClose, onReady }) => {
             {
               comprobanteUrl.match(/\.(jpg|jpeg|png|gif)$/i)
                 ? <img src={comprobanteUrl} alt="Comprobante" style={{maxWidth:'100%',maxHeight:500,borderRadius:12,boxShadow:'0 2px 8px #e91e6322',display:comprobanteLoading?'none':'block'}} onLoad={()=>setComprobanteLoading(false)} onError={()=>setComprobanteLoading(false)} />
-                : <iframe src={comprobanteUrl} title="Comprobante" style={{width:'100%',height:500,border:'none',borderRadius:12,boxShadow:'0 2px 8px #e91e6322',display:comprobanteLoading?'none':'block'}} onLoad={()=>setComprobanteLoading(false)} />
+                : comprobanteUrl.match(/\.(pdf)$/i)
+                  ? <iframe src={comprobanteUrl} title="Comprobante PDF" style={{width:'100%',height:500,border:'none',borderRadius:12,boxShadow:'0 2px 8px #e91e6322',display:comprobanteLoading?'none':'block'}} onLoad={()=>setComprobanteLoading(false)} />
+                  : <iframe src={comprobanteUrl} title="Comprobante" style={{width:'100%',height:500,border:'none',borderRadius:12,boxShadow:'0 2px 8px #e91e6322',display:comprobanteLoading?'none':'block'}} onLoad={()=>setComprobanteLoading(false)} />
             }
           </div>
         ) : <>
