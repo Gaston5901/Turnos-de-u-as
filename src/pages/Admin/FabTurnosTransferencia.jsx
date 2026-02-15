@@ -5,6 +5,7 @@ import TurnosTransferenciaModal from './TurnosTransferenciaModal';
 
 const FabTurnosTransferencia = () => {
   const [open, setOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
   const [count, setCount] = useState(0); // Simula que hay 1 pendiente
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
 
@@ -30,7 +31,10 @@ const FabTurnosTransferencia = () => {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setModalLoading(true);
+          setOpen(true);
+        }}
         style={{
           position: 'fixed',
           bottom: isMobile ? 16 : 32,
@@ -74,7 +78,7 @@ const FabTurnosTransferencia = () => {
           </span>
         )}
       </button>
-      {open && <TurnosTransferenciaModal onClose={() => setOpen(false)} />}
+      {open && <TurnosTransferenciaModal onClose={() => { setOpen(false); setModalLoading(false); }} onReady={() => setModalLoading(false)} />}
     </>
   );
 };

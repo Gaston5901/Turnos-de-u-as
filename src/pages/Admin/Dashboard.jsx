@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { turnosAPI, serviciosAPI, usuariosAPI } from '../../services/api';
 import { LayoutDashboard, Calendar, DollarSign, Users, TrendingUp, Package } from 'lucide-react';
+import FabTurnosTransferencia from './FabTurnosTransferencia';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import './Admin.css';
 
 const Dashboard = () => {
+
   const [stats, setStats] = useState({
     turnosHoy: 0,
     turnosMes: 0,
@@ -21,55 +23,58 @@ const Dashboard = () => {
     cargarDatos();
   }, []);
 
-  const cargarDatos = async () => {
-    try {
-      const [turnosRes, serviciosRes, usuariosRes] = await Promise.all([
-        turnosAPI.getAll(),
-        serviciosAPI.getAll(),
-        usuariosAPI.getAll(),
-      ]);
+  function cargarDatos() {
+    (async () => {
+      try {
+        const [turnosRes, serviciosRes, usuariosRes] = await Promise.all([
+          turnosAPI.getAll(),
+          serviciosAPI.getAll(),
+          usuariosAPI.getAll(),
+        ]);
 
-      const serviciosMap = {};
-      serviciosRes.data.forEach((s) => {
-        serviciosMap[s.id] = s;
-      });
-      setServicios(serviciosMap);
+        const serviciosMap = {};
+        serviciosRes.data.forEach((s) => {
+          serviciosMap[s.id] = s;
+        });
+        setServicios(serviciosMap);
 
-      const hoy = format(new Date(), 'yyyy-MM-dd');
-      const inicioMes = format(startOfMonth(new Date()), 'yyyy-MM-dd');
-      const finMes = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+        const hoy = format(new Date(), 'yyyy-MM-dd');
+        const inicioMes = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+        const finMes = format(endOfMonth(new Date()), 'yyyy-MM-dd');
 
-      const turnosDelDia = turnosRes.data.filter((t) => t.fecha === hoy && t.estado !== 'en_proceso');
-      const turnosDelMes = turnosRes.data.filter(
-        (t) => t.fecha >= inicioMes && t.fecha <= finMes && t.estado !== 'en_proceso'
-      );
+        const turnosDelDia = turnosRes.data.filter((t) => t.fecha === hoy && t.estado !== 'en_proceso');
+        const turnosDelMes = turnosRes.data.filter(
+          (t) => t.fecha >= inicioMes && t.fecha <= finMes && t.estado !== 'en_proceso'
+        );
 
-      // Clientes nuevos este mes
-      const usuarioIdsMes = [...new Set(turnosDelMes.map(t => t.usuarioId))];
-      // Para cada usuario, buscar si tiene turnos previos al mes
-      const clientesNuevosMes = usuarioIdsMes.filter(uid => {
-        const prevTurnos = turnosRes.data.find(t => t.usuarioId === uid && t.fecha < inicioMes);
-        return !prevTurnos;
-      }).length;
+        // Clientes nuevos este mes
+        const usuarioIdsMes = [...new Set(turnosDelMes.map(t => t.usuarioId))];
+        // Para cada usuario, buscar si tiene turnos previos al mes
+        const clientesNuevosMes = usuarioIdsMes.filter(uid => {
+          const prevTurnos = turnosRes.data.find(t => t.usuarioId === uid && t.fecha < inicioMes);
+          return !prevTurnos;
+        }).length;
 
-      const gananciasMes = turnosDelMes.reduce((sum, t) => sum + t.montoPagado, 0);
-      const clientesUnicos = usuariosRes.data.filter((u) => u.rol === 'cliente').length;
+        const gananciasMes = turnosDelMes.reduce((sum, t) => sum + t.montoPagado, 0);
+        const clientesUnicos = usuariosRes.data.filter((u) => u.rol === 'cliente').length;
 
-      setStats({
-        turnosHoy: turnosDelDia.length,
-        turnosMes: turnosDelMes.length,
-        gananciasMes,
-        clientes: clientesUnicos,
-        clientesNuevosMes // <-- nuevo dato
-      });
+        setStats({
+          turnosHoy: turnosDelDia.length,
+          turnosMes: turnosDelMes.length,
+          gananciasMes,
+          clientes: clientesUnicos,
+          clientesNuevosMes
+        });
 
-      setTurnosHoy(turnosDelDia.sort((a, b) => a.hora.localeCompare(b.hora)));
-    } catch (error) {
-      console.error('Error al cargar datos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setTurnosHoy(turnosDelDia.sort((a, b) => a.hora.localeCompare(b.hora)));
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }
+
 
   if (loading) {
     return (
@@ -82,6 +87,7 @@ const Dashboard = () => {
 
   return (
       <div className="admin-page">
+        <FabTurnosTransferencia />
         <div className="admin-header">
           <h1 style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
             <LayoutDashboard size={36} style={{verticalAlign:'middle'}} />
@@ -132,17 +138,41 @@ const Dashboard = () => {
               <h2 style={{fontSize:'20px'}}>Turnos de Hoy</h2>
               <div className="turnos-hoy-list">
                 {turnosHoy.length > 0 ? (
-                  turnosHoy.map((t) => (
-                    <div key={t.id} className="turno-hoy-item">
-                      <div className="turno-hora">{t.hora}</div>
-                      <div className="turno-detalles">
-                        <h4>{servicios[t.servicioId]?.nombre}</h4>
-                        <p>{t.montoPagado ? `Pagado: $${t.montoPagado}` : 'Sin pago'}</p>
-                        <p className="turno-id">ID: {t.pagoId}</p>
+                  turnosHoy.map((t) => {
+                    const esRechazado = t.estado === 'rechazado';
+                    const esConfirmado = t.estado === 'confirmado';
+                    let estilo = {};
+                    if (esRechazado) {
+                      estilo = {
+                        background: 'rgba(160,32,240,0.08)',
+                        border: '1.5px solid #a020f0',
+                        color: '#a020f0',
+                        fontWeight: 600
+                      };
+                    } else if (esConfirmado) {
+                      estilo = {
+                        background: 'rgba(56,142,60,0.08)',
+                        border: '1.5px solid #388e3c',
+                        color: '#388e3c',
+                        fontWeight: 600
+                      };
+                    }
+                    return (
+                      <div
+                        key={t.id}
+                        className="turno-hoy-item"
+                        style={estilo}
+                      >
+                        <div className="turno-hora">{t.hora}</div>
+                        <div className="turno-detalles">
+                          <h4>{servicios[t.servicioId]?.nombre}</h4>
+                          <p>{t.montoPagado ? `Pagado: $${t.montoPagado}` : 'Sin pago'}</p>
+                          <p className="turno-id">ID: {t.pagoId}</p>
+                        </div>
+                        <div className={`turno-estado ${t.estado}`}>{t.estado}</div>
                       </div>
-                      <div className={`turno-estado ${t.estado}`}>{t.estado}</div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="no-data">No hay turnos para hoy</p>
                 )}

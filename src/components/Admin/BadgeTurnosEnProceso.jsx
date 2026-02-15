@@ -14,7 +14,7 @@ const BadgeTurnosEnProceso = () => {
       }
     };
     fetchCount();
-    const interval = setInterval(fetchCount, 15000); // refresca cada 15s
+    const interval = setInterval(fetchCount, 7000); // refresca cada 7s
     return () => clearInterval(interval);
   }, []);
 

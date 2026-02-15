@@ -3,13 +3,17 @@ import api from '../../services/api';
 import Swal from 'sweetalert2';
 import { API_BASE_URL } from '../../config/apiBaseUrl';
 
-const TurnosTransferenciaModal = ({ onClose }) => {
+const TurnosTransferenciaModal = ({ onClose, onReady }) => {
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [comprobanteUrl, setComprobanteUrl] = useState(null); // visor de comprobante
   const [comprobanteLoading, setComprobanteLoading] = useState(false);
   const [accionLoadingId, setAccionLoadingId] = useState(null); // id del turno en proceso
+
+  useEffect(() => {
+    fetchTurnos();
+  }, []);
 
   const fetchTurnos = async () => {
     setLoading(true);
@@ -28,53 +32,22 @@ const TurnosTransferenciaModal = ({ onClose }) => {
       setError(null);
     } catch (err) {
       setError('Error al cargar los turnos');
-      setTurnos([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  useEffect(() => {
-    fetchTurnos();
-  }, []);
-
+  // Acción para confirmar o rechazar transferencia
   const handleAccion = async (id, accion) => {
     setAccionLoadingId(id);
-    const accionTexto = accion === 'confirmar' ? 'confirmar' : 'rechazar';
-    const accionColor = accion === 'confirmar' ? '#388e3c' : '#e91e63';
-    const result = await Swal.fire({
-      title: `¿Seguro que quieres ${accionTexto} este turno?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: `Sí, ${accionTexto}`,
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: accionColor,
-      cancelButtonColor: '#888',
-      background: '#fff',
-      color: '#222',
-      allowOutsideClick: false,
-      allowEscapeKey: true,
-      backdrop: true,
-      target: document.body,
-      heightAuto: true,
-      customClass: {
-        popup: 'swal2-over-modal',
-      },
-    });
-    if (!result.isConfirmed) {
-      setAccionLoadingId(null);
-      return;
-    }
     try {
-      // Actualizar estado en backend
       if (accion === 'confirmar') {
         await api.patch(`/turnos/${id}/aprobar-transferencia`);
       } else {
         await api.patch(`/turnos/${id}/rechazar-transferencia`);
       }
       // El mail de confirmación ya se envía desde el backend al aprobar la transferencia
-      // Refrescar la lista de turnos para que se actualice en la UI
       await fetchTurnos();
-      // Mostrar alerta de éxito solo si todo salió bien
       await Swal.fire({
         title: `Turno ${accion === 'confirmar' ? 'confirmado' : 'rechazado'} correctamente`,
         icon: 'success',
@@ -154,27 +127,35 @@ const TurnosTransferenciaModal = ({ onClose }) => {
           </div>
         ) : <>
         <h2 style={{marginBottom:24, color:'#e91e63', fontWeight:700, fontSize:28, textAlign:'center'}}>Turnos a confirmar <span style={{fontWeight:400, fontSize:20}}>(Transferencia)</span></h2>
-        {loading ? <div>Cargando...</div> : error ? <div>{error}</div> : (
-          <div style={{width:'100%',overflowX:'auto'}}>
-            <table style={{width:'100%',minWidth:900,fontSize:16,background:'#fff',borderRadius:12,boxShadow:'0 2px 8px #e91e6322',borderCollapse:'collapse'}}>
-              <thead>
-                <tr style={{background:'#fce4ec',color:'#e91e63'}}>
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Cliente</th>
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Método</th>
-                  {/* <th style={{padding:'10px 8px',fontWeight:700}}>Entidad</th> */}
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Fecha/Hora</th>
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Servicio</th>
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Monto</th>
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Seña</th>
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Comprobante</th>
-                  <th style={{padding:'10px 8px',fontWeight:700}}>Acciones</th>
+        {error && <div>{error}</div>}
+        <div style={{width:'100%',overflowX:'auto'}}>
+          <table style={{width:'100%',minWidth:900,fontSize:16,background:'#fff',borderRadius:12,boxShadow:'0 2px 8px #e91e6322',borderCollapse:'collapse'}}>
+            <thead>
+              <tr style={{background:'#fce4ec',color:'#e91e63'}}>
+                <th style={{padding:'10px 8px',fontWeight:700}}>Cliente</th>
+                <th style={{padding:'10px 8px',fontWeight:700}}>Método</th>
+                {/* <th style={{padding:'10px 8px',fontWeight:700}}>Entidad</th> */}
+                <th style={{padding:'10px 8px',fontWeight:700}}>Fecha/Hora</th>
+                <th style={{padding:'10px 8px',fontWeight:700}}>Servicio</th>
+                <th style={{padding:'10px 8px',fontWeight:700}}>Monto</th>
+                <th style={{padding:'10px 8px',fontWeight:700}}>Seña</th>
+                <th style={{padding:'10px 8px',fontWeight:700}}>Comprobante</th>
+                <th style={{padding:'10px 8px',fontWeight:700}}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="9" style={{textAlign:'center',padding:20}}>
+                    <div className="spinner" style={{border:'4px solid #eee',borderTop:'4px solid #e91e63',borderRadius:'50%',width:32,height:32,display:'inline-block',animation:'spin 1s linear infinite',verticalAlign:'middle'}}></div>
+                    <style>{`@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}`}</style>
+                    <div style={{marginTop:8, color:'#e91e63', fontWeight:600, fontSize:18}}>Cargando...</div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {turnos.length === 0 ? (
-                  <tr><td colSpan="9" style={{textAlign:'center',padding:20}}>No hay turnos pendientes</td></tr>
-                ) : (
-                  turnos.map(turno => {
+              ) : turnos.length === 0 ? (
+                <tr><td colSpan="9" style={{textAlign:'center',padding:20}}>No hay turnos pendientes</td></tr>
+              ) : (
+                turnos.map(turno => {
                     const url = turno.comprobanteTransferencia
                       ? (turno.comprobanteTransferencia.startsWith('http')
                         ? turno.comprobanteTransferencia
@@ -296,8 +277,8 @@ const TurnosTransferenciaModal = ({ onClose }) => {
               </tbody>
             </table>
           </div>
-        )}
-        </>}
+        
+        </>} 
       </div>
     </div>
   );

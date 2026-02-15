@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import HorarioSelectorAdmin from './HorarioSelectorAdmin';
 import { toast } from 'react-toastify';
 import './Admin.css';
-import FabTurnosTransferencia from './FabTurnosTransferencia';
 
 const Turnos = () => {
   // Estado para modal de edición
@@ -733,7 +732,6 @@ const Turnos = () => {
           )}
         </div>
       </div>
-      <FabTurnosTransferencia />
     </div>
   );
 };

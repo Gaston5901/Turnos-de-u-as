@@ -26,7 +26,20 @@ const TransferenciaForm = () => {
   const navigate = useNavigate();
 
   const handleFileChange = e => {
-    setComprobante(e.target.files[0]);
+    const file = e.target.files[0];
+    if (!file) {
+      setComprobante(null);
+      return;
+    }
+    // Validar tipo de archivo: permitir imágenes y PDF
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp', 'image/bmp', 'image/heic', 'image/heif'];
+    if (!validTypes.includes(file.type)) {
+      setError('El archivo debe ser una imagen o PDF');
+      setShowError(true);
+      setComprobante(null);
+      return;
+    }
+    setComprobante(file);
   };
 
   const handleSubmit = async e => {
@@ -159,6 +172,7 @@ const TransferenciaForm = () => {
             accept="image/*,application/pdf"
             onChange={handleFileChange}
             required
+            capture="environment"
             style={{
               opacity: 0,
               width: '100%',
@@ -195,6 +209,9 @@ const TransferenciaForm = () => {
             </span>
           </div>
         </div>
+        {showError && error && (
+          <div style={{color:'#e91e63',fontWeight:600,marginTop:6,fontSize:14}}>{error}</div>
+        )}
       </label>
       <div style={{fontWeight:600,marginTop:8}}>Seña a transferir: <span style={{fontWeight:700,color:'#e91e63',fontSize:20}}>${senia}</span></div>
       <button type="submit" disabled={enviando || !camposCompletos} style={{
