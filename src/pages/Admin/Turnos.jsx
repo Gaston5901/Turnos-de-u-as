@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { turnosAPI, serviciosAPI, usuariosAPI, horariosAPI } from '../../services/api';
+import api from '../../services/api';
 import { Calendar, Check, X, Plus, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import HorarioSelectorAdmin from './HorarioSelectorAdmin';
@@ -13,6 +14,7 @@ const Turnos = () => {
     // Prepara el objeto editable con los datos del turno y del usuario
     const usuario = usuarios[turno.usuarioId] || {};
     setTurnoEditar({
+  
       ...turno,
       nombre: usuario.nombre || turno.nombre || '',
       telefono: usuario.telefono || turno.telefono || '',
@@ -170,9 +172,13 @@ const Turnos = () => {
     if (creando) return;
     setCreando(true);
     let passwordGenerada = null;
+    let usuario = Object.values(usuarios).find(u => u.email?.toLowerCase() === nuevoTurno.email?.toLowerCase());
+    let usuarioId = usuario?.id || usuario?._id;
+    // Solo enviar passwordGenerada si el usuario es completamente nuevo (creado en este flujo)
+    let usuarioEsNuevo = false;
     try {
-      let usuario = Object.values(usuarios).find(u => u.email === nuevoTurno.email);
       if (!usuario) {
+        // Usuario nuevo creado por turno presencial
         passwordGenerada = 'temporal123';
         const nuevoUsuario = {
           nombre: nuevoTurno.nombre?.trim() || '',
@@ -180,8 +186,8 @@ const Turnos = () => {
           telefono: nuevoTurno.telefono?.trim() || '',
           password: passwordGenerada,
           rol: 'cliente',
+          creadoPorTurno: true
         };
-        console.log('Payload usuario:', nuevoUsuario);
         try {
           const userRes = await usuariosAPI.create(nuevoUsuario);
           const createdUser = userRes.data?.usuario || userRes.data;
@@ -191,9 +197,11 @@ const Turnos = () => {
             email: createdUser?.email || nuevoUsuario.email,
             nombre: createdUser?.nombre || nuevoUsuario.nombre,
             telefono: createdUser?.telefono || nuevoUsuario.telefono,
+            creadoPorTurno: true
           };
+          usuarioId = usuario.id;
+          usuarioEsNuevo = true;
         } catch (userError) {
-          // Mostrar todos los errores de validación del backend
           if (userError?.response?.data?.errores) {
             userError.response.data.errores.forEach(err => {
               toast.error('Error usuario: ' + err.msg);
@@ -206,11 +214,41 @@ const Turnos = () => {
             toast.error('Error al crear usuario');
           }
           console.error(userError);
+          setCreando(false);
           return;
         }
+      } else {
+        // Usuario ya existe: SIEMPRE usar los datos guardados
+        // Solo actualizar si el campo está vacío en la base y se ingresa uno nuevo
+        let nombreFinal = usuario.nombre || '';
+        let telefonoFinal = usuario.telefono || '';
+        let debeActualizar = false;
+        if (!nombreFinal && nuevoTurno.nombre?.trim()) {
+          nombreFinal = nuevoTurno.nombre.trim();
+          debeActualizar = true;
+        }
+        if (!telefonoFinal && nuevoTurno.telefono?.trim()) {
+          telefonoFinal = nuevoTurno.telefono.trim();
+          debeActualizar = true;
+        }
+        if (debeActualizar && usuarioId) {
+          try {
+            await usuariosAPI.update(usuarioId, {
+              nombre: nombreFinal,
+              telefono: telefonoFinal,
+            });
+            usuario = { ...usuario, nombre: nombreFinal, telefono: telefonoFinal };
+          } catch (err) {
+            toast.error('No se pudo actualizar el nombre/teléfono del usuario');
+          }
+        }
+        // Nunca enviar passwordGenerada si el usuario ya existía
+        usuarioEsNuevo = false;
+        passwordGenerada = undefined;
       }
       const servicio = servicios[nuevoTurno.servicioId];
       const montoSeña = Math.round(servicio.precio * 0.5);
+      // Solo agregar passwordGenerada si el usuario es completamente nuevo
       const turnoData = {
         usuario: usuario.id, // Mongo espera 'usuario' como ObjectId
         servicio: servicio.id || servicio._id, // Mongo espera 'servicio' como ObjectId
@@ -222,11 +260,14 @@ const Turnos = () => {
         montoTotal: servicio.precio,
         createdAt: new Date().toISOString(),
         email: usuario.email,
-        nombre: usuario.nombre,
-        telefono: usuario.telefono,
-        ...(passwordGenerada ? { passwordGenerada } : {})
+        nombre: usuario.nombre, // SIEMPRE el guardado
+        telefono: usuario.telefono // SIEMPRE el guardado
       };
+      if (usuarioEsNuevo && passwordGenerada) {
+        turnoData.passwordGenerada = passwordGenerada;
+      }
       await turnosAPI.create(turnoData);
+      // ENVÍO DE EMAILS eliminado para evitar errores 404
       toast.success('Turno creado exitosamente con seña pagada');
       setMostrarFormulario(false);
       setNuevoTurno({

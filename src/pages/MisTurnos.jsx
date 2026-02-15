@@ -90,6 +90,10 @@ if (typeof window !== 'undefined') {
 }
 
 const MisTurnos = () => {
+    // Scroll automático al top al entrar a la página
+    useEffect(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, []);
   const { user } = useAuth();
   const [turnos, setTurnos] = useState([]);
   const [modalCancelar, setModalCancelar] = useState({ open: false, turno: null });
