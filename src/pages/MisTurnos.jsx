@@ -1,3 +1,79 @@
+// Banner serpiente animado fino y colorido debajo del título
+function SnakeBanner({ show }) {
+  if (!show) return null;
+  // Mensaje a animar
+  const mensaje = (
+    <>
+      <span
+        role="img"
+        aria-label="serpiente"
+        style={{
+          fontSize: '1.5em',
+          verticalAlign: 'middle',
+          position: 'relative',
+          top: '-0.18em'
+        }}
+      >
+        𝕯ɴ. 
+      </span>{' '}
+      Verificá tu Gmail para ver la confirmación del turno. Si tu turno está "en proceso", recargá la página más tarde: puede ser confirmado o rechazado en cualquier momento.
+      <span role="img" aria-label="serpiente"></span>
+    </>
+  );
+  return (
+    <div style={{
+      width: '100vw',
+      margin: '0 auto',
+      marginBottom: 16,
+      overflow: 'hidden',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 0,
+      maxWidth: '100vw',
+      paddingLeft: 0,
+      paddingRight: 0,
+    }}>
+      <div style={{
+        background: 'linear-gradient(90deg,#fce4ec 0%,#f8bbd0 50%,#fce4ec 100%)',
+        color: '#e91e63',
+        fontWeight: 600,
+        fontSize: 'clamp(13px,2.2vw,16px)',
+        padding: '6px 0',
+        borderRadius: 12,
+        boxShadow: '0 2px 8px #e91e6322',
+        width: '98vw',
+        maxWidth: '1100px',
+        minHeight: 0,
+        position: 'relative',
+        border: '1.5px solid #f8bbd0',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          width: '100%',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            display: 'inline-flex',
+            whiteSpace: 'nowrap',
+            alignItems: 'center',
+            width: 'max-content',
+            animation: 'snake-banner-move 22s linear infinite',
+          }}>
+            <span style={{ display: 'inline-block', paddingRight: 80 }}>{mensaje}</span>
+            <span style={{ display: 'inline-block', paddingRight: 80 }}>{mensaje}</span>
+          </div>
+        </div>
+        <style>{`
+          @keyframes snake-banner-move {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
+}
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +82,12 @@ import { Calendar, Clock, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import './MisTurnos.css';
+
+// Quitar scroll lateral de la página
+if (typeof window !== 'undefined') {
+  document.documentElement.style.overflowX = 'hidden';
+  document.body.style.overflowX = 'hidden';
+}
 
 const MisTurnos = () => {
   const { user } = useAuth();
@@ -59,6 +141,7 @@ const MisTurnos = () => {
           </h1>
           <p>Administrá tus reservas</p>
         </div>
+        <SnakeBanner show={Array.isArray(turnos) && turnos.some(t => t.estado === 'en_proceso')} />
         <div className="container">
           {loading ? (
             <div className="container" style={{ textAlign: 'center', padding: '100px 20px' }}>
