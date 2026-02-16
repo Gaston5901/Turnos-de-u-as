@@ -13,8 +13,9 @@ const Footer = () => {
             Cuidamos cada detalle para que tus manos y pies luzcan perfectos.
           </p>
           <div className="footer-social">
-            <a href="https://www.instagram.com/nailsstudio_delfina?igsh=OHllbHcxZ3ByZGV2" target="_blank" rel="noopener" className="social-link">
-              <Instagram size={24} />
+            <a href="https://www.instagram.com/nailsstudio_delfina" target="_blank" rel="noopener" className="social-link">
+                <Instagram size={24} />
+                <span style={{ display: 'block', fontSize: '13px', marginTop: '2px', color: '#fff' }}>nailsstudio_delfina</span>
             </a>
             {/* <a href="#" className="social-link" title="Facebook (próximamente)">
               <Facebook size={24} />
