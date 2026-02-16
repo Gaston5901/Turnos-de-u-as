@@ -89,12 +89,15 @@ const Turnos = () => {
     }
   };
 
+  // Estado loading para guardar horarios extras
+  const [guardandoHorariosExtras, setGuardandoHorariosExtras] = useState(false);
   // Guardar horarios extras en la base
   const guardarHorariosExtras = async () => {
     if (!fechaHorariosExtras) {
       toast.error('Selecciona una fecha');
       return;
     }
+    setGuardandoHorariosExtras(true);
     try {
       const resp = await horariosAPI.getPorDia();
       // Verifica que el payload sea un objeto con arrays como valores
@@ -110,6 +113,8 @@ const Turnos = () => {
     } catch (error) {
       toast.error('Error al guardar horarios: ' + (error?.message || JSON.stringify(error)));
       console.error('Error al guardar horarios:', error);
+    } finally {
+      setGuardandoHorariosExtras(false);
     }
   };
     // Estado para modal de edición
@@ -422,8 +427,13 @@ const Turnos = () => {
                             <button style={{background:'#d13fa0',color:'#fff',border:'none',borderRadius:'6px',padding:'2px 12px',fontWeight:'bold'}} onClick={() => {if(nuevoHorario){setHorariosExtras([...horariosExtras,nuevoHorario]);setNuevoHorario('');}}}>Agregar</button>
                           </div>
                           <div style={{display:'flex',justifyContent:'flex-end',gap:'12px',marginBottom:'18px'}}>
-                            <button style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'8px 22px',fontWeight:'bold',fontSize:'1rem'}} onClick={() => setMostrarHorariosExtras(false)}>Cancelar</button>
-                            <button style={{background:'linear-gradient(90deg,#d13fa0,#e7b2e6)',color:'#fff',border:'none',borderRadius:'8px',padding:'8px 22px',fontWeight:'bold',fontSize:'1rem'}} onClick={guardarHorariosExtras} disabled={!fechaHorariosExtras}>Guardar cambios</button>
+                            <button style={{background:'#fff',color:'#d13fa0',border:'1.5px solid #d13fa0',borderRadius:'8px',padding:'8px 22px',fontWeight:'bold',fontSize:'1rem'}} onClick={() => setMostrarHorariosExtras(false)} disabled={guardandoHorariosExtras}>Cancelar</button>
+                            <button style={{background:'linear-gradient(90deg,#d13fa0,#e7b2e6)',color:'#fff',border:'none',borderRadius:'8px',padding:'8px 22px',fontWeight:'bold',fontSize:'1rem',opacity:guardandoHorariosExtras?0.7:1,cursor:guardandoHorariosExtras?'not-allowed':'pointer'}} onClick={guardarHorariosExtras} disabled={!fechaHorariosExtras||guardandoHorariosExtras}>
+                              {guardandoHorariosExtras ? (
+                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{marginRight:8}}></span>
+                              ) : null}
+                              Guardar cambios
+                            </button>
                           </div>
                         </>
                       )}

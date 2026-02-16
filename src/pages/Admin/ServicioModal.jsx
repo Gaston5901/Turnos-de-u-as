@@ -2,13 +2,21 @@ import React from 'react';
 import './ServicioModal.css';
 
 const ServicioModal = ({ visible, onClose, onSubmit, formData, setFormData, editando }) => {
+  const [loading, setLoading] = React.useState(false);
   if (!visible) return null;
+
+  const handleSubmit = async (e) => {
+    setLoading(true);
+    await onSubmit(e);
+    setLoading(false);
+  };
+
   return (
     <div className="servicio-modal-backdrop" onClick={onClose}>
       <div className="servicio-modal" onClick={e => e.stopPropagation()}>
         <button className="servicio-modal-close" onClick={onClose}>&times;</button>
         <h3 style={{marginBottom:16}}>{editando ? 'Editar Servicio' : 'Nuevo Servicio'}</h3>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={handleSubmit}>
           <div className="servicio-modal-grid">
             <div className="form-group">
               <label htmlFor="nombre-servicio-modal">Nombre del Servicio</label>
@@ -32,8 +40,11 @@ const ServicioModal = ({ visible, onClose, onSubmit, formData, setFormData, edit
             </div>
           </div>
           <div className="servicio-modal-actions">
-            <button type="submit" className="btn btn-primary">{editando ? 'Actualizar' : 'Crear'} Servicio</button>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="btn btn-primary" disabled={loading} style={loading ? {opacity:0.7,cursor:'not-allowed'} : {}}>
+              {loading ? <span className="spinner" style={{marginRight:'8px',width:'18px',height:'18px',display:'inline-block',verticalAlign:'middle'}}></span> : null}
+              {editando ? 'Actualizar' : 'Crear'} Servicio
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancelar</button>
           </div>
         </form>
       </div>
