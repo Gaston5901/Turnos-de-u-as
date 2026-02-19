@@ -52,7 +52,26 @@ const PagarConTransferenciaBtn = () => {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-secondary btn-pagar" style={{marginTop:8,background:'#fff',color:'#e91e63',border:'2px solid #e91e63',fontWeight:700}} onClick={()=>setOpen(true)}>
+      <button
+        className="btn btn-secondary btn-pagar"
+        style={{
+          marginTop: 8,
+          background: '#fff',
+          color: '#e91e63',
+          border: '2px solid #e91e63',
+          fontWeight: 700,
+          transition: 'background 0.18s, color 0.18s',
+        }}
+        onMouseOver={e => {
+          e.currentTarget.style.background = '#e91e63';
+          e.currentTarget.style.color = '#fff';
+        }}
+        onMouseOut={e => {
+          e.currentTarget.style.background = '#fff';
+          e.currentTarget.style.color = '#e91e63';
+        }}
+        onClick={() => setOpen(true)}
+      >
         Pagar con Transferencia
       </button>
       <ModalTransferencia open={open} onClose={()=>setOpen(false)} />
