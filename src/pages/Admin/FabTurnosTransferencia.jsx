@@ -3,7 +3,7 @@ import { Bell } from 'lucide-react';
 import api from '../../services/api';
 import TurnosTransferenciaModal from './TurnosTransferenciaModal';
 
-const FabTurnosTransferencia = () => {
+const FabTurnosTransferencia = ({ onReloadDatos }) => {
   const [open, setOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [count, setCount] = useState(0); // Simula que hay 1 pendiente
@@ -78,7 +78,16 @@ const FabTurnosTransferencia = () => {
           </span>
         )}
       </button>
-      {open && <TurnosTransferenciaModal onClose={() => { setOpen(false); setModalLoading(false); }} onReady={() => setModalLoading(false)} />}
+      {open && (
+        <TurnosTransferenciaModal
+          onClose={() => {
+            setOpen(false);
+            setModalLoading(false);
+          }}
+          onReady={() => setModalLoading(false)}
+          onReloadDatos={onReloadDatos}
+        />
+      )}
     </>
   );
 };

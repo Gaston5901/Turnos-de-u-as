@@ -3,7 +3,7 @@ import api from '../../services/api';
 import Swal from 'sweetalert2';
 import { API_BASE_URL } from '../../config/apiBaseUrl';
 
-const TurnosTransferenciaModal = ({ onClose, onReady }) => {
+const TurnosTransferenciaModal = ({ onClose, onReady, onReloadDatos }) => {
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -78,6 +78,12 @@ const TurnosTransferenciaModal = ({ onClose, onReady }) => {
     }
   };
 
+  // Handler para cerrar el modal y recargar datos si corresponde
+  const handleClose = () => {
+    if (onReloadDatos) onReloadDatos();
+    if (onClose) onClose();
+  };
+
   return (
     <div style={{
       position: 'fixed',
@@ -108,7 +114,7 @@ const TurnosTransferenciaModal = ({ onClose, onReady }) => {
         alignItems: 'center',
         zIndex: 1500,
       }}>
-        <button onClick={onClose} style={{position:'absolute',top:18,right:18,fontSize:28,background:'none',border:'none',cursor:'pointer',color:'#e91e63',fontWeight:'bold'}}>×</button>
+        <button onClick={handleClose} style={{position:'absolute',top:18,right:18,fontSize:28,background:'none',border:'none',cursor:'pointer',color:'#e91e63',fontWeight:'bold'}}>×</button>
         {comprobanteUrl ? (
           <div style={{width:'100%',minHeight:400,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
             <button onClick={()=>{setComprobanteUrl(null); setComprobanteLoading(false);}} style={{marginBottom:18,background:'#e91e63',color:'#fff',border:'none',borderRadius:8,padding:'8px 22px',fontWeight:600,fontSize:18,cursor:'pointer'}}>Volver</button>

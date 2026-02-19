@@ -19,9 +19,15 @@ const Dashboard = () => {
   const [servicios, setServicios] = useState({});
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     cargarDatos();
   }, []);
+
+  // Permite recargar datos desde hijos (FabTurnosTransferencia)
+  const handleReloadDatos = () => {
+    cargarDatos();
+  };
 
   function cargarDatos() {
     (async () => {
@@ -87,7 +93,7 @@ const Dashboard = () => {
 
   return (
       <div className="admin-page">
-        <FabTurnosTransferencia />
+        <FabTurnosTransferencia onReloadDatos={handleReloadDatos} />
         <div className="admin-header">
           <h1 style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
             <LayoutDashboard size={36} style={{verticalAlign:'middle'}} />
