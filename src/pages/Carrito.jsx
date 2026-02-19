@@ -474,9 +474,9 @@ const Carrito = () => {
                 <p>🏠 Dirección: Barrio San Martín mza A casa 5</p>
                 <p>💰 Resto en el estudio</p>
               </div>
-              <button className="btn btn-primary btn-pagar" onClick={procesarPago} disabled={procesando}>
+              {/* <button className="btn btn-primary btn-pagar" onClick={procesarPago} disabled={procesando}>
                 {procesando ? (<><div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>Procesando...</>) : (<><CreditCard size={20} />Pagar (prueba local)</>)}
-              </button>
+              </button> */}
               {/* <button className="btn btn-secondary btn-pagar" style={{marginTop:8}} onClick={pagarConMercadoPago} disabled={procesando}>
                 {procesando ? (<><div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>Procesando...</>) : (<><CreditCard size={20} />Pagar con Mercado Pago</>)}
               </button> */}
